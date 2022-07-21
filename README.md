@@ -9,4 +9,4 @@ NodeJS Express Server Api
 ## git reset HEAD~1
 
 ## References
-### Visit: http://localhost:3010/api
+### npm start: http://localhost:3000/api
