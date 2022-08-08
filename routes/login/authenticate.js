@@ -27,7 +27,7 @@ router.post("/:siteid", async (request, response) => {
 
     }
     catch (err) {
-        return response.send({error: 'an error has occured', err: err});
+        return response.status(500).send({error: 'an error has occured'});
     }
 });
 

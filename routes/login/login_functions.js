@@ -49,7 +49,7 @@ const LoginFunctions = {
 
         } catch (err) {
             //console.log({getUserByLogin: err});
-            //throw err
+            throw err
         }
     },
 

@@ -23,7 +23,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
         return response.send(result);
     }
     else {
-        return response.send({err: 'you\'re not authorized to see this'});
+        return response.status(401).send({error: 'you\'re not authorized to access this'});
     }
 
 });
@@ -43,7 +43,7 @@ router.get("/:siteid/:id", async function (request, response) {
         return response.send(result);
     }
     else {
-        return response.send({err: 'you\'re not authorized to access this'});
+        return response.status(401).send({error: 'you\'re not authorized to access this'});
     }
 });
 
@@ -68,7 +68,7 @@ router.post("/:siteid", async function (request, response) {
         return response.send(result);
     }
     else {
-        return response.send({err: 'you\'re not authorized to see this'});
+        return response.status(401).send({error: 'you\'re not authorized to access this'});
     }
 });
 
@@ -87,7 +87,7 @@ router.delete("/:siteid/:id", async function (request, response) {
         return response.send(result);
     }
     else {
-        return response.send({err: 'you\'re not authorized to access this'});
+        return response.status(401).send({error: 'you\'re not authorized to access this'});
     }
 });
 
