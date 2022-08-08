@@ -8,6 +8,9 @@ NodeJS Express Server Api
 ## git pull origin main  --allow-unrelated-histories
 ## git push --set-upstream origin master
 ## git reset HEAD~1
+## git remote -v
+## git push origin
+## git push origin2
 
 ## References
 ### npm start: http://localhost:3000/api
