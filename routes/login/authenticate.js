@@ -17,6 +17,8 @@ router.post("/:siteid", async (request, response) => {
         const loginResult = await login.getUserByLogin(config, username, password, siteid);
         const loginUser =  (loginResult.recordset && loginResult.recordset.length === 1)? loginResult.recordset[0] : null;
         
+       // console.log({siteid: siteid, config: config, loginResult: loginResult, headers: headers, username: username, password: password})
+
         if(loginUser && loginUser.AuthID){
             await login.updateUserLoginInfo(config, username, password, siteid, loginUser.AuthID);
             return response.send(loginUser);
