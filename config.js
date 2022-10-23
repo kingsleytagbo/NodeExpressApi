@@ -1,5 +1,6 @@
 const config = [
     {
+        configPath: 'A:/Projects/Coding/CMS/node-configs/connect-stlouis.config',
         user: 'your sql server user id',
         password: 'your sql server password',
         server: 'your sql server server name',
@@ -8,9 +9,7 @@ const config = [
         options: {
             enableArithAbort: true
         }
-    },
-    /* CONNECTSAINTLOUIS.COM */
-   
+    }
     
 ];
 

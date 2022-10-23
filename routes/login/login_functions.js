@@ -1,12 +1,6 @@
 
 const sql = require("mssql");
 
-class Polygon {
-    constructor(height, width) {
-      this.area = height * width;
-    }
-  }
-
 const LoginFunctions = {
 
     /*

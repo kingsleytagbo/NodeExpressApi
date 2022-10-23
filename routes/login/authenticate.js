@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const configs = require('../../config');
+const configs = require('../../config_functions'); //require('../../config');
 const login = require('./login_functions');
 
 // Validates a user's login information based on the username and password
@@ -12,7 +12,7 @@ router.post("/:siteid", async (request, response) => {
         const base64AuthenticationHeader = (headers.authorization || '').split(' ')[1] || '';
         const [username, password] = Buffer.from(base64AuthenticationHeader, 'base64').toString().split(':')
 
-        const config = configs.find(c => c.privateKeyID === siteid);
+        const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
 
         const loginResult = await login.getUserByLogin(config, username, password, siteid);
         const loginUser =  (loginResult.recordset && loginResult.recordset.length === 1)? loginResult.recordset[0] : null;
