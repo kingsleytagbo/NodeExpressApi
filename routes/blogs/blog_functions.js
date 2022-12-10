@@ -59,31 +59,103 @@ const BlogFunctions = {
         }
     },
 
+        /*
+        Creates a singLe Blog & associated roles in SQL Server
+    */
+        createItem: async (config, privateKeyID, user, data) => {
+            privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
+    
+            try {
+                await sql.connect(config);
+                const request = new sql.Request();
+                request.input('Name', sql.VarChar(125), data.Name);
+                request.input('Description', sql.VarChar(), data.Description);
+                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
+                request.input('BlogType', sql.VarChar(), (data.BlogType || ''));
+                request.input('PostDate', sql.DateTime2, data.PostDate);
+                request.input('SortOrder', sql.Int, (data.SortOrder || 0));
+                request.input('Category', sql.VarChar(), (data.Category || ''));
+                request.input('Tags', sql.VarChar(), (data.Tags || ''));
+                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
+                request.input('ITCC_UserID', sql.VarChar(), user.ITCC_UserID);
+                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
+                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('CreateDate', sql.DateTime, data.CreateDate);
+                request.input('ModifyDate', sql.DateTime, data.ModifyDate);
+                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
+                request.input('RoleName', sql.VarChar(), data.RoleName);
+                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+    
+                let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
+                query += ' BEGIN TRAN; ';
+                query += ' INSERT INTO ITCC_BLOG (Name, Description, Slug, BlogType, Permalink, PostDate, Category, Tags, PostSummary, ';
+                query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, ModifyUserID, RoleName, SortOrder )';
+                query += '  VALUES (@Name, @Description, @Slug, @BlogType, NEWID(), @PostDate, @Category, @Tags, @PostSummary, ';
+                query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ModifyUserID, @RoleName, @SortOrder )';
+        
+                query += ' COMMIT TRANSACTION;';
+                query += ' SELECT SCOPE_IDENTITY() NEWID;';
+        
+                const authResult = await request.query(query);
+                const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+    
+                console.log({result: result});
+                return result;
+    
+            } catch (err) {
+                console.log({PostBlog: err})
+                throw err
+            }
+        },
+
     /*
         Updates a singLe Blog's information on SQL Server
     */
-    updateItem: async (config, privateKeyID, id, Blogname, emailaddress) => {
-        privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
-
-        try {
-            await sql.connect(config);
-            let query = ' UPDATE ITCC_Blog SET ';
-            query += ' Blogname = @Blogname, EmailAddress = @EmailAddress ';
-            query += ' WHERE ( ' +
-                ' ( ITCC_BlogID = @ID ) ' +
-                '); SELECT @@ROWCOUNT; ';
-
-            const request = new sql.Request();
-            request.input('ID', sql.Int, id);
-            request.input('Blogname', sql.NVarChar(64), Blogname);
-            request.input('EmailAddress', sql.NVarChar(64), emailaddress);
-            const result = await request.query(query);
-            return result;
-
-        } catch (err) {
-            throw err
-        }
-    },
+        updateItem: async (config, privateKeyID, user, data) => {
+            privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
+    
+            try {
+                await sql.connect(config);
+                const request = new sql.Request();
+                request.input('Name', sql.VarChar(125), data.Name);
+                request.input('Description', sql.VarChar(), data.Description);
+                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
+                request.input('BlogType', sql.VarChar(), (data.BlogType || ''));
+                request.input('PostDate', sql.DateTime2, data.PostDate);
+                request.input('SortOrder', sql.Int, (data.SortOrder || 0));
+                request.input('Category', sql.VarChar(), (data.Category || ''));
+                request.input('Tags', sql.VarChar(), (data.Tags || ''));
+                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
+                request.input('ITCC_BlogID', sql.Int, data.ITCC_BlogID);
+                request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
+                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
+                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('CreateDate', sql.DateTime, data.CreateDate);
+                request.input('ModifyDate', sql.DateTime, data.ModifyDate);
+                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
+                request.input('RoleName', sql.VarChar(), data.RoleName);
+                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+    
+                let query = ' ';
+                query += ' BEGIN TRAN; ';
+                query += ' UPDATE ITCC_BLOG SET Name=@Name, Description=@Description, Slug=@Slug, BlogType=@BlogType, ';
+                query += ' PostDate = @PostDate, Category=@Category, Tags=@Tags, ITCC_StatusID=@ITCC_StatusID, ModifyDate = @ModifyDate, SortOrder = @SortOrder ';
+                query += ' WHERE ITCC_BlogID = @ITCC_BlogID; '; 
+                query += ' COMMIT TRANSACTION;';
+                query += ' SELECT @@ROWCOUNT;';
+        
+                console.log(query)
+                const authResult = await request.query(query);
+                const result = data;
+    
+                console.log({result: result});
+                return result;
+    
+            } catch (err) {
+                console.log({PostBlog: err})
+                throw err
+            }
+        },
 
     /*
         Deletes a singLe non-admin Blog's information on SQL Server  
@@ -136,62 +208,7 @@ const BlogFunctions = {
         } catch (err) {
             throw err
         }
-    },
-
-    /*
-        Creates a singLe Blog & associated roles in SQL Server
-    */
-    createItem: async (config, privateKeyID,
-        Blogname, firstname, lastname, email, isonline, isapproved, islockedout,
-        password, statusid, createBlogid, modifyBlogid) => {
-        privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
-
-        try {
-            await sql.connect(config);
-            let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
-            query += ' BEGIN TRAN; ';
-            query += ' INSERT INTO ITCC_Blog (';
-            query += ' BlogName, Password, FirstName, LastName, EmailAddress, ';
-            query += ' IsOnline, IsApproved, IsLockedOut, ITCC_StatusID, ';
-            query += ' BlogID, BlogToken, CreateDate, CreateBlogID, ModifyDate, ModifyBlogID';
-            query += ' ) ';
-            query += ' VALUES ( ' +
-                ' @BlogName, @Password, @FirstName, @LastName, @EmailAddress, ' +
-                ' @IsOnline, @IsApproved, @IsLockedOut, @StatusID, ' +
-                ' NewID(), NewID(), getdate(), 1, getdate(), 1' +
-                '); SELECT @NEWID = SCOPE_IDENTITY();';
-
-            query += ' INSERT INTO ITCC_WEBSITEBlog (ITCC_WebsiteID, ITCC_BlogID, CreateDate, CreateBlogID, ModifyDate, ModifyBlogID )';
-            query += ' SELECT  @SiteID, @NEWID, getdate(), 1, getdate(), 1';
-
-            query += ' INSERT INTO ITCC_BlogROLE (ITCC_WebsiteID, ITCC_BlogID, ITCC_ROLEID )';
-            query += ' SELECT DISTINCT @SiteID, @NEWID, RL.ITCC_ROLEID ';
-            query += ' FROM ITCC_WEBSITE WS JOIN ITCC_ROLE RL ';
-            query += ' ON (WS.ITCC_WebsiteID = RL.ITCC_WebsiteID) ';
-            query += ' WHERE ( (WS.PrivateKeyID = @PrivateKeyID) AND RL.NAME IN (' + roleNames + ' ) ); '
-
-            query += ' SELECT @NEWID NEWID,  @SiteID SiteID; COMMIT;'
-
-            const request = new sql.Request();
-            request.output('NewID', sql.Int);
-            request.output('SiteID', sql.Int);
-            request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('BlogName', sql.NVarChar(64), Blogname);
-            request.input('EmailAddress', sql.NVarChar(64), email);
-            request.input('Password', sql.NVarChar(64), password);
-            request.input('FirstName', sql.NVarChar(64), firstname);
-            request.input('LastName', sql.NVarChar(128), lastname);
-            request.input('StatusID', sql.Bit, 1);
-            request.input('IsApproved', sql.Bit, 1);
-            request.input('IsOnline', sql.Bit, 1);
-            request.input('IsLockedOut', sql.Bit, 1);
-            const result = await request.query(query);
-            return result;
-
-        } catch (err) {
-            throw err
-        }
-    },
+    }
 };
 
 module.exports = BlogFunctions;

@@ -126,7 +126,9 @@ const LoginFunctions = {
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('AuthID', sql.UniqueIdentifier, authID);
             
-            const result = await request.query(query);
+            const authResult = await request.query(query);
+            const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+
             return result;
         } catch (err) {
             //console.log({getUserByLogin: err});
@@ -139,7 +141,7 @@ const LoginFunctions = {
     */
     getUserRolesByAuthToken: async (config, privateKeyID, authID) => {
         const authResult = await LoginFunctions.getUserByAuthToken(config, privateKeyID, authID);
-        const authUser = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+        const authUser = authResult;
         const roleNames = (authUser && authUser.RoleNames) ? String(authUser.RoleNames).split(',') : null;
         return roleNames;
     }

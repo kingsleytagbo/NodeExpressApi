@@ -4,6 +4,20 @@ const blogs = require('./blog_functions');
 const login = require('../login/login_functions');
 const LoginFunctions = require('../login/login_functions');
 
+const BlogFactory = {
+    Fields: {
+        Name: '', Description: '', Slug: '', BlogType: '', Permalink: '', PostDate: '', PostSummary:'',
+        Category: '', Tags:'', ITCC_UserID: -1, ITCC_WebsiteID: -1, ITCC_StatusID: -1, ITCC_BlogID: 0,
+        CreateDate: new Date(), ModifyDate: new Date(), ModifyUserID: -1, RoleName: 'anonymous'
+    }
+    , Set: function (value) {
+        this.Fields = Object.assign(this.Fields, value);
+    }
+    , Get: function () {
+        return this.Fields;
+    }
+};
+
 
 //  http://localhost:3010/api/gallery/FEA91F56-CBE3-4138-8BB6-62F9A5808D57/1
 //  http://localhost:3010/api/users/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1
@@ -17,11 +31,13 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const pageSize = 20; 
     const offset = (pageNum - 1) * pageSize;
 
+    /*
     console.log({
         'list blogs': {
             params: request.params, authID: authID,  authToken:  authToken
         }
     })
+    */
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
@@ -45,11 +61,13 @@ router.get("/:siteid/:id", async function (request, response) {
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
+    /*
     console.log({
         'one blog': {
             params: request.params, authid: authID, id: id, authToken: authToken
         }
     })
+    */
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
@@ -71,18 +89,41 @@ router.post("/:siteid", async function (request, response) {
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
-    const firstname = request.body.firstname;
-    const lastname = request.body.lastname;
-    const username = request.body.username;
-    const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getItemRolesByAuthToken(config, siteid, authID);
+    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    //console.log({authUser: authUser});
 
-    if (roleNames.indexOf('admin') > -1) {
-        const authResult = await blogs.createItem(config, siteid, 
-            username, username, username, emailaddress, 1, 1, 0,
-            emailaddress, 1, 1, 1);
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        BlogFactory.Set(request.body);
+        const dataValues = BlogFactory.Get();
+        
+        const authResult = await blogs.createItem(config, siteid, authUser, dataValues);
+        const result =  authResult.recordset;
+        return response.send(result);
+    }
+    else {
+        return response.status(401).send({error: 'you\'re not authorized to access this'});
+    }
+
+});
+
+// update an Item
+router.put("/:siteid/:id", async function (request, response) {
+    const siteid = request.params.siteid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
+    const id = request.params.id;
+
+    const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
+    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        BlogFactory.Set(request.body);
+        const dataValues = BlogFactory.Get();
+        console.log({authUser: authUser, dataValues: dataValues});
+
+        const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
         const result =  authResult.recordset;
         return response.send(result);
     }
@@ -111,26 +152,5 @@ router.delete("/:siteid/:id", async function (request, response) {
     }
 });
 
-// update a Item
-router.put("/:siteid/:id", async function (request, response) {
-    const siteid = request.params.siteid;
-    const authToken = LoginFunctions.getAuthenticationToken(request);
-    const authID = authToken || (request.headers.authid);
-    const id = request.body.id;
-    const username = request.body.username;
-    const emailaddress = request.body.emailaddress;
-
-    const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getItemRolesByAuthToken(config, siteid, authID);
-
-    if (roleNames.indexOf('admin') > -1) {
-        const authResult = await blogs.updateItem(config, siteid, id, username, emailaddress);
-        const result =  authResult.recordset;
-        return response.send(result);
-    }
-    else {
-        return response.send({err: 'you\'re not authorized to access this'});
-    }
-});
 
 module.exports = router;
