@@ -53,16 +53,15 @@ router.get("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const authResult = await blogs.getItem(config, siteid, id);
+    const result =  (authResult.recordset && (authResult.recordset.length > 0))
+    ? authResult.recordset[0] : null;
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
-        const authResult = await blogs.getItem(config, siteid, id);
-        const result =  authResult.recordset;
         return response.send(result);
     }
     else {
-        return response.status(403).send({
-            message: 'you do not have permission to access this / POST',
-          });
+        return response.send(result);
     }
 });
 
