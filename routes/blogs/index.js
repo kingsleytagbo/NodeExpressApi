@@ -41,12 +41,13 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
 // get one blog
 router.get("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
     console.log({
         'one blog': {
-            params: request.params, authid: authID, id: id
+            params: request.params, authid: authID, id: id, authToken: authToken
         }
     })
 
@@ -59,14 +60,17 @@ router.get("/:siteid/:id", async function (request, response) {
         return response.send(result);
     }
     else {
-        return response.status(401).send({error: 'you\'re not authorized to access this'});
+        return response.status(403).send({
+            message: 'you do not have permission to access this / POST',
+          });
     }
 });
 
 // create a new Item along with some basic roles needed to access the system
 router.post("/:siteid", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
     const firstname = request.body.firstname;
     const lastname = request.body.lastname;
@@ -91,7 +95,8 @@ router.post("/:siteid", async function (request, response) {
 // delete a Item
 router.delete("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
@@ -110,7 +115,8 @@ router.delete("/:siteid/:id", async function (request, response) {
 // update a Item
 router.put("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.body.id;
     const username = request.body.username;
     const emailaddress = request.body.emailaddress;
