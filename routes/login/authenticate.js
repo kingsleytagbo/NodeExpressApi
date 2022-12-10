@@ -10,14 +10,14 @@ router.post("/:siteid", async (request, response) => {
         const headers = request.headers;
         // parse login and password from headers
         const base64AuthenticationHeader = (headers.authorization || '').split(' ')[1] || '';
-        const [username, password] = Buffer.from(base64AuthenticationHeader, 'base64').toString().split(':')
+        const [username, password] = Buffer.from(base64AuthenticationHeader, 'base64').toString().split(':');
 
         const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
 
         const loginResult = await login.getUserByLogin(config, username, password, siteid);
         const loginUser =  (loginResult.recordset && loginResult.recordset.length === 1)? loginResult.recordset[0] : null;
-        
-       // console.log({siteid: siteid, config: config, loginResult: loginResult, headers: headers, username: username, password: password})
+        loginUser.RoleNames = (loginUser.RoleNames.length > 0) ? loginUser.RoleNames.split(',') : [];
+      // console.log({loginUser:loginUser, AuthID:loginUser, username: username, password: password})
 
         if(loginUser && loginUser.AuthID){
             await login.updateUserLoginInfo(config, username, password, siteid, loginUser.AuthID);

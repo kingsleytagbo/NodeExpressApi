@@ -2,28 +2,37 @@ const router = require('express').Router();
 const configs = require('../../config_functions'); //require('../../config');
 const users = require('./user_functions');
 const login = require('../login/login_functions');
+const LoginFunctions = require('../login/login_functions');
 
 
 //  http://localhost:3010/api/gallery/FEA91F56-CBE3-4138-8BB6-62F9A5808D57/1
+//  http://localhost:3010/api/users/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
 router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const pageNum = (request.params.pagenum) ? request.params.pagenum : 1;
     const pageSize = 20; 
     const offset = (pageNum - 1) * pageSize;
 
+    console.log({
+        'list users': {
+            params: request.params, authID: authID,  authToken:  authToken
+        }
+    })
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (roleNames && roleNames.indexOf('admin') > -1) {
         const usersResult = await users.getUsers(config, siteid, offset, pageSize);
         const result = usersResult.recordset;
-        return response.send(result);
+        return response.status(200).send(result);
     }
     else {
-        return response.status(401).send({error: 'you\'re not authorized to access this'});
+        return response.status(200).send([]);
     }
 
 });
@@ -34,10 +43,16 @@ router.get("/:siteid/:id", async function (request, response) {
     const authID = request.headers.authid;
     const id = request.params.id;
 
+    console.log({
+        'one user': {
+            params: request.params, authid: authID, id: id
+        }
+    })
+
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (roleNames && roleNames.indexOf('admin') > -1) {
         const authResult = await users.getUser(config, siteid, id);
         const result =  authResult.recordset;
         return response.send(result);

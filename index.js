@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3010;
+const port = process.env.PORT || 3011;
 const bodyParser = require("body-parser");
 const cors = require('cors');
 
@@ -8,7 +8,7 @@ const cors = require('cors');
 app.use(bodyParser.json()); 
 app.use(cors());
 const server = app.listen(port, function () {
-    //console.log('Server is running on: ' + port);
+    console.log('Server is running on: ' + port);
 });
 
 app.get('/', function (request, response) {
@@ -24,4 +24,6 @@ app.use('/api/login/authorize', require('./routes/login/authorize'));
 */
 
 app.use('/api/users', require('./routes/users/index'));
+app.use('/api/blog', require('./routes/blogs/index'));
+app.use('/api/gallery', require('./routes/gallery/index'));
 

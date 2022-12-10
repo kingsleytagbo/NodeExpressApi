@@ -3,6 +3,16 @@ const sql = require("mssql");
 
 const LoginFunctions = {
 
+    /* Get a User's Authentication Token from the Authorization Header*/
+    getAuthenticationToken(req) {
+        const base64AuthenticationHeader =
+          (req.headers.authorization || '').split(' ')[1] || '';
+        const [authToken] = Buffer.from(base64AuthenticationHeader, 'base64')
+          .toString()
+          .split(':');
+        return authToken;
+      },
+
     /*
         Authenticate's a User's Login Info based on their UserName & Password & 
         Select the User's authentication & associated roles from SQL Server
