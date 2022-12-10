@@ -40,7 +40,8 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
 // get one user
 router.get("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
     console.log({
@@ -65,7 +66,8 @@ router.get("/:siteid/:id", async function (request, response) {
 // create a new user along with some basic roles needed to access the system
 router.post("/:siteid", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
     const firstname = request.body.firstname;
     const lastname = request.body.lastname;
@@ -90,7 +92,8 @@ router.post("/:siteid", async function (request, response) {
 // delete a user
 router.delete("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
@@ -109,7 +112,8 @@ router.delete("/:siteid/:id", async function (request, response) {
 // update a user
 router.put("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
-    const authID = request.headers.authid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
     const id = request.body.id;
     const username = request.body.username;
     const emailaddress = request.body.emailaddress;

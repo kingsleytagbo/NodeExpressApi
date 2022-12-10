@@ -7,6 +7,19 @@ const cors = require('cors');
 // Body Parser Middleware
 app.use(bodyParser.json()); 
 app.use(cors());
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", '*');
+    // if you add credentials include in the frontend, remove wildcards above and specify origin below
+    //res.header("Access-Control-Allow-Origin", "http://localhost:8080" ),
+    res.header("Access-Control-Allow-Credentials", true);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
+    if (req.methods === 'OPTIONS'){
+        cosole.log({options: req});
+        res.sendStatus(204)
+    }
+    next();
+});
 const server = app.listen(port, function () {
     console.log('Server is running on: ' + port);
 });
