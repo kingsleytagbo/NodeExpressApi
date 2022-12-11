@@ -41,4 +41,5 @@ app.use('/api/login/authorize', require('./routes/login/authorize'));
 app.use('/api/users', require('./routes/users/index'));
 app.use('/api/blog', require('./routes/blogs/index'));
 app.use('/api/gallery', require('./routes/gallery/index'));
+app.use('/api/image', require('./routes/image/index'));
 

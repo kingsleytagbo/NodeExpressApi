@@ -39,7 +39,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
 
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser && authUser.RoleNames.indexOf('admin') > -1) {
         const itemsResult = await gallery.getItems(config, siteid, offset, pageSize);
         const result = itemsResult.recordset;
         return response.status(200).send(result);
@@ -84,11 +84,15 @@ router.post("/:siteid", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
-    const fileUploadDirectory =  config.fileUploadDirectory || path.join(__dirname, "public", "files");
+    const uploadDir =  path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
+
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir);
+    }
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         const form = new formidable.IncomingForm({
-            uploadDir: fileUploadDirectory,
+            uploadDir: uploadDir,
             keepExtensions: true,
         });
 
@@ -117,6 +121,7 @@ router.post("/:siteid", async function (request, response) {
                 dataValues.IsActive = 1;
                 dataValues.Slug = newFilename;
                 dataValues.FilePath = filepath;
+                dataValues.PublishUrl = '/api/image/' + siteid + '/' + newFilename;
                 dataValues.Title = originalFilename || newFilename;
 
                 const newTags = (size + ', ' + mimetype);
@@ -152,10 +157,10 @@ router.put("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
-    const fileUploadDirectory =  config.fileUploadDirectory || path.join(__dirname, "public", "files");
+    const uploadDir =  path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
 
     const form = new formidable.IncomingForm({
-        uploadDir: fileUploadDirectory,
+        uploadDir: uploadDir,
         keepExtensions: true,
     });
     form.parse(request, function (err, fields, files) {
