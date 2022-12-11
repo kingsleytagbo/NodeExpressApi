@@ -4,6 +4,22 @@ const users = require('./user_functions');
 const login = require('../login/login_functions');
 const LoginFunctions = require('../login/login_functions');
 
+const UserFactory = {
+    Fields: {
+        ITCC_UserID: -1, UserID: '', ITCC_WebsiteID: -1, ITCC_StatusID: -1, 
+        CreateDate: new Date(), ModifyDate: new Date(), CreateUserID:-1, ModifyUserID: -1, RoleName: 'subscriber',
+        UserName : '', Password : '', EmailAddress : '', FirstName : '', IsOnline : -1, UserToken : '',
+        IsApproved : -1, IsLockedOut : -1
+    }
+    , Set: function (value) {
+        this.Fields = Object.assign(this.Fields, value);
+    }
+    , Get: function () {
+        return this.Fields;
+    }
+};
+
+
 
 //  http://localhost:3010/api/gallery/FEA91F56-CBE3-4138-8BB6-62F9A5808D57/1
 //  http://localhost:3010/api/users/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1
@@ -17,11 +33,6 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const pageSize = 20; 
     const offset = (pageNum - 1) * pageSize;
 
-    console.log({
-        'list users': {
-            params: request.params, authID: authID,  authToken:  authToken
-        }
-    })
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
     
@@ -43,12 +54,6 @@ router.get("/:siteid/:id", async function (request, response) {
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
-
-    console.log({
-        'one user': {
-            params: request.params, authid: authID, id: id
-        }
-    })
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
@@ -73,16 +78,21 @@ router.post("/:siteid", async function (request, response) {
     const lastname = request.body.lastname;
     const username = request.body.username;
     const emailaddress = request.body.emailaddress;
-
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+       UserFactory.Set(request.body);
+        const dataValues = UserFactory.Get();
+        return response.send(dataValues);
+/*
         const authResult = await users.createUser(config, siteid, 
             username, username, username, emailaddress, 1, 1, 0,
             emailaddress, 1, 1, 1);
         const result =  authResult.recordset;
         return response.send(result);
+*/
     }
     else {
         return response.status(401).send({error: 'you\'re not authorized to access this'});

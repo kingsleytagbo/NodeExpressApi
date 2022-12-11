@@ -8,7 +8,7 @@ const BlogFactory = {
     Fields: {
         Name: '', Description: '', Slug: '', BlogType: '', Permalink: '', PostDate: '', PostSummary:'',
         Category: '', Tags:'', ITCC_UserID: -1, ITCC_WebsiteID: -1, ITCC_StatusID: -1, ITCC_BlogID: 0,
-        CreateDate: new Date(), ModifyDate: new Date(), ModifyUserID: -1, RoleName: 'anonymous'
+        CreateDate: new Date(), ModifyDate: new Date(), CreateUserID:-1, ModifyUserID: -1, RoleName: 'subscriber'
     }
     , Set: function (value) {
         this.Fields = Object.assign(this.Fields, value);
