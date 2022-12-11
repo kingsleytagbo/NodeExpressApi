@@ -165,39 +165,12 @@ const BlogFunctions = {
         try {
             await sql.connect(config);
 
-            let query = ' BEGIN TRAN; ';
-
-            // DELETE BlogROLE
-            query += ' DELETE UR ';
-            query += ' FROM [ITCC_Blog] US (NOLOCK) JOIN [ITCC_WebsiteBlog] WU (NOLOCK) ';
-            query += ' ON (US.ITCC_BlogID = WU.ITCC_BlogID) ';
-            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_BlogROLE] UR (NOLOCK) ON (WS.ITCC_WebsiteID = UR.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ROLE] IR (NOLOCK) ON (UR.ITCC_ROLEID = IR.ITCC_ROLEID) ';
+            let query = ' DELETE US ';
+            query += ' FROM [ITCC_Blog] US ';
+            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (US.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
             query += ' WHERE ( ' +
-                ' (UR.ITCC_BlogID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) AND (UR.ITCC_BlogID > 1) ' +
-                '); ';
-
-
-            // DELETE WEBSITEBlog
-            query += ' DELETE WU ';
-            query += ' FROM [ITCC_Blog] US (NOLOCK) JOIN [ITCC_WebsiteBlog] WU (NOLOCK) ';
-            query += ' ON (US.ITCC_BlogID = WU.ITCC_BlogID) ';
-            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_BlogROLE] UR (NOLOCK) ON (WS.ITCC_WebsiteID = UR.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ROLE] IR (NOLOCK) ON (UR.ITCC_ROLEID = IR.ITCC_ROLEID) ';
-            query += ' WHERE ( ' +
-                ' (WU.ITCC_BlogID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) AND (WU.ITCC_BlogID > 1) ' +
-                '); ';
-
-            // DELETE Blog
-            query += ' DELETE US ';
-            query += ' FROM [ITCC_Blog] US (NOLOCK) ';
-            query += ' WHERE ( ' +
-                ' (US.ITCC_BlogID = @ID) AND (US.ITCC_BlogID > 1) ' +
-                '); ';
-
-            query += ' COMMIT';
+                ' (US.ITCC_BlogID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
+                ') ';
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
