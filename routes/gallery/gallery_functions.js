@@ -75,13 +75,14 @@ const GalleryFunctions = {
                 request.input('Tags', sql.NVarChar(), (data.Tags || ''));
                 request.input('Title', sql.NVarChar(255), (data.Title || ''));
 
-                request.input('FilePath', sql.NVarChar(383), (data.PostSummary || {}));
+                request.input('FilePath', sql.NVarChar(383), (data.FilePath || ''));
+                request.input('FileGroup', sql.NVarChar(255), (data.FileGroup || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
                 request.input('IsActive', sql.Bit, 1);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
                 request.input('UpdateDate', sql.DateTime, data.ModifyDate);
-                request.input('ModifyUserID', sql.VarChar(), user.ITCC_UserID);
+                request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
                 request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
                 request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
 
@@ -89,10 +90,10 @@ const GalleryFunctions = {
     
                 let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
                 query += ' BEGIN TRAN; ';
-                query += ' INSERT INTO ITCC_Image (Name, Description, Slug, Category, Tags, Title, FilePath, ';
-                query += ' ITCC_WebsiteID, IsActive, CreateDate, ModifyDate, UpdateDate, ModifyUserID, UpdateUserID, CreateAccountID )';
-                query += '  VALUES (@Name, @Description, @Slug, @Category, @Tags, @Title, @FilePath, ';
-                query += ' @SiteID, @IsActive, @CreateDate, @ModifyDate, @UpdateDate, @ModifyUserID, @UpdateUserID, @CreateAccountID )';
+                query += ' INSERT INTO ITCC_Image (Name, Description, Slug, Category, Tags, Title, FilePath, FileGroup, ';
+                query += ' ITCC_WebsiteID, IsActive, CreateDate, ModifyDate, UpdateDate, ModifyAccountID, UpdateUserID, CreateAccountID )';
+                query += '  VALUES (@Name, @Description, @Slug, @Category, @Tags, @Title, @FilePath, @FileGroup, ';
+                query += ' @SiteID, @IsActive, @CreateDate, @ModifyDate, @UpdateDate, @ModifyAccountID, @UpdateUserID, @CreateAccountID )';
         
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT SCOPE_IDENTITY() NEWID;';
@@ -133,7 +134,7 @@ const GalleryFunctions = {
                 request.input('ITCC_StatusID', sql.VarChar(), 2);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
+                request.input('ModifyAccountID', sql.VarChar(), data.ModifyAccountID);
                 request.input('RoleName', sql.VarChar(), data.RoleName);
                 request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
     

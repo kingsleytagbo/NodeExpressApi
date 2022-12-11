@@ -8,7 +8,7 @@ const GalleryFactory = {
     Fields: {
         Name: '', Description: '', Slug: '', Title: '',
         Category: '', Tags: '', ITCC_WebsiteID: -1, ITCC_ImageID: 0,
-        CreateDate: new Date(), ModifyDate: new Date(), CreateUserID: -1, ModifyUserID: -1,
+        CreateDate: new Date(), ModifyDate: new Date(), CreateUserID: -1, ModifyAccountID: -1,
         FileGroup: '', FilePath: '', SourceUrl: '', PublishUrl: '', SourceImageUrl: '',
         UpdateDate: new Date(), UpdateUserID: -1, IsActive: 0,
         CreateAccountID: -1
@@ -121,7 +121,7 @@ router.post("/:siteid", async function (request, response) {
 
                 dataValues.CreateAccountID = authUser.ITCC_UserID;
                 dataValues.CreateUserID = authUser.ITCC_UserID;
-                dataValues.ModifyUserID = authUser.ITCC_UserID;
+                dataValues.ModifyAccountID = authUser.ITCC_UserID;
                 dataValues.UpdateUserID = authUser.ITCC_UserID;
 
                 console.log({ dataValues: dataValues });
