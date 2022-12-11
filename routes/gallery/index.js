@@ -1,8 +1,24 @@
 const router = require('express').Router();
 const configs = require('../../config_functions'); //require('../../config');
 const gallery = require('./gallery_functions');
-const login = require('../login/login_functions');
 const LoginFunctions = require('../login/login_functions');
+
+const GalleryFactory = {
+    Fields: {
+        Name: '', Description: '', Slug: '',  Title  :'',
+        Category: '', Tags:'', ITCC_WebsiteID: -1,  ITCC_ImageID: 0,
+        CreateDate: new Date(), ModifyDate: new Date(), CreateUserID:-1, ModifyUserID: -1,
+        FileGroup  : '', FilePath  :'', SourceUrl  :'', PublishUrl  :'', SourceImageUrl  :'',
+        UpdateDate : new Date(), UpdateUserID  : -1, IsActive :0,
+        CreateAccountID  :-1
+    }
+    , Set: function (value) {
+        this.Fields = Object.assign(this.Fields, value);
+    }
+    , Get: function () {
+        return this.Fields;
+    }
+};
 
 
 //  http://localhost:3010/api/gallery/FEA91F56-CBE3-4138-8BB6-62F9A5808D57/1
@@ -24,7 +40,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     })
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
     const itemsResult = await gallery.getItems(config, siteid, offset, pageSize);
     const result = itemsResult.recordset;
 
@@ -52,7 +68,7 @@ router.get("/:siteid/:id", async function (request, response) {
     })
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         const authResult = await gallery.getItem(config, siteid, id);
@@ -78,15 +94,23 @@ router.post("/:siteid", async function (request, response) {
     const username = request.body.username;
     const emailaddress = request.body.emailaddress;
 
-    const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const config = configs.find(siteid); 
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        GalleryFactory.Set(request.body);
+        const dataValues = GalleryFactory.Get();
+        console.log({authUser: authUser, dataValues: dataValues, body: request.body});
+
+        return response.send('ok');
+        //const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
+        /*
         const authResult = await gallery.createItem(config, siteid, 
             username, username, username, emailaddress, 1, 1, 0,
             emailaddress, 1, 1, 1);
         const result =  authResult.recordset;
         return response.send(result);
+        */
     }
     else {
         return response.status(403).send({
@@ -102,13 +126,20 @@ router.delete("/:siteid/:id", async function (request, response) {
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
-    const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const config = configs.find(siteid); 
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        GalleryFactory.Set(request.body);
+        const dataValues = GalleryFactory.Get();
+        console.log({authUser: authUser, dataValues: dataValues, body: request.body});
+
+        return response.send('ok');
+        /*
         const authResult = await gallery.deleteItem(config, siteid, id);
         const result =  authResult.recordset;
         return response.send(result);
+        */
     }
     else {
         return response.status(403).send({
@@ -127,7 +158,7 @@ router.put("/:siteid/:id", async function (request, response) {
     const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
 
     if (roleNames.indexOf('admin') > -1) {
         const authResult = await gallery.updateItem(config, siteid, id, username, emailaddress);

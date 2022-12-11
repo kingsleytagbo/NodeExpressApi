@@ -40,7 +40,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     */
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
     const itemsResult = await blogs.getItems(config, siteid, offset, pageSize);
     const result = itemsResult.recordset;
 
@@ -70,7 +70,7 @@ router.get("/:siteid/:id", async function (request, response) {
     */
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
     const authResult = await blogs.getItem(config, siteid, id);
     const result =  (authResult.recordset && (authResult.recordset.length > 0))
     ? authResult.recordset[0] : null;
@@ -91,7 +91,7 @@ router.post("/:siteid", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
     //console.log({authUser: authUser});
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
@@ -116,12 +116,11 @@ router.put("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         BlogFactory.Set(request.body);
         const dataValues = BlogFactory.Get();
-        console.log({authUser: authUser, dataValues: dataValues});
 
         const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
         const result =  authResult.recordset;
@@ -140,7 +139,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         await blogs.deleteItem(config, siteid, id);

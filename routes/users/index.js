@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const configs = require('../../config_functions'); //require('../../config');
 const users = require('./user_functions');
-const login = require('../login/login_functions');
 const LoginFunctions = require('../login/login_functions');
 
 const UserFactory = {
@@ -34,7 +33,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const offset = (pageNum - 1) * pageSize;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
     
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
@@ -56,7 +55,7 @@ router.get("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         const authResult = await users.getUser(config, siteid, id);
@@ -80,7 +79,7 @@ router.post("/:siteid", async function (request, response) {
     const username = request.body.username;
     const emailaddress = request.body.emailaddress;
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
     
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
@@ -105,7 +104,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const authUser = await login.getUserByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         const authResult = await users.deleteUser(config, siteid, id);
@@ -126,7 +125,7 @@ router.put("/:siteid/:id", async function (request, response) {
     const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
 
     if (roleNames.indexOf('admin') > -1) {
         const authResult = await users.updateUser(config, siteid, id, username, emailaddress);
