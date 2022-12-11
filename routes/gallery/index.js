@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const configs = require('../../config_functions'); //require('../../config');
+const configs = require('../../config_functions'); 
 const gallery = require('./gallery_functions');
+const formidable = require("formidable");
 const LoginFunctions = require('../login/login_functions');
 
 const GalleryFactory = {
@@ -77,13 +78,96 @@ router.post("/:siteid", async function (request, response) {
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
-    const id = request.params.id;
+    const body = request.body;
 
+    const config = configs.find(siteid); 
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        const form = new formidable.IncomingForm({
+            uploadDir: 'C:\\Users\\kings\\Downloads\\uploads',
+            keepExtensions: true,
+          });
+
+          form.parse(request, function (err, fields, files) {
+            if(err)
+            {
+                return response.status(403).send({
+                    message: 'you do not have permission to access this / POST',
+                  });
+            }
+            else{
+                const file = files.file;
+                const filepath = file.filepath;
+                const newFilename = file.newFilename;
+                const originalFilename = file.originalFilename;
+                const mimetype = file.mimetype;
+                const size = file.size;
+                
+                GalleryFactory.Set(fields);
+                const dataValues = GalleryFactory.Get();
+                dataValues.IsActive = 1;
+                dataValues.Slug = newFilename;
+                dataValues.FilePath = filepath;
+                dataValues.Title = originalFilename || newFilename;
+
+                const newTags = (size + ', ' + mimetype);
+                dataValues.Tags = dataValues.Tags ? dataValues.Tags += newTags : newTags;
+
+                dataValues.CreateAccountID = authUser.ITCC_UserID;
+                dataValues.CreateUserID = authUser.ITCC_UserID;
+                dataValues.ModifyUserID = authUser.ITCC_UserID;
+                dataValues.UpdateUserID = authUser.ITCC_UserID;
+
+                console.log(dataValues: dataValues)
+
+                return response.send(dataValues);
+            }
+
+          });
+
+
+      
+        //console.log({authUser: authUser, dataValues: dataValues, body: request.body});
+        //const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
+        /*
+        const authResult = await gallery.createItem(config, siteid, 
+            username, username, username, emailaddress, 1, 1, 0,
+            emailaddress, 1, 1, 1);
+        const result =  authResult.recordset;
+        return response.send(result);
+        */
+    }
+    else {
+        return response.status(403).send({
+            message: 'you do not have permission to access this / POST',
+          });
+    }
+});
+
+// update a gallery
+router.put("/:siteid/:id", async function (request, response) {
+    const siteid = request.params.siteid;
+    const authToken = LoginFunctions.getAuthenticationToken(request);
+    const authID = authToken || (request.headers.authid);
+    const body = request.body;
+    const form = new formidable.IncomingForm({
+        uploadDir: 'C:\\Users\\kings\\Downloads\\uploads',
+        keepExtensions: true,
+      });
+      console.log({form: form, body: request.body, form2: request.form});
+      form.parse(request, function (err, fields, files) {
+        console.log({
+            err:err, fields:fields, files:files
+        })
+      });
+/*
     console.log({
-        'post gallery': {
+        'PUT gallery': {
             params: request.params, body: request.body
         }
     })
+    */
 
     const config = configs.find(siteid); 
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
@@ -91,7 +175,7 @@ router.post("/:siteid", async function (request, response) {
     if (authUser.RoleNames.indexOf('admin') > -1) {
         GalleryFactory.Set(request.body);
         const dataValues = GalleryFactory.Get();
-        console.log({authUser: authUser, dataValues: dataValues, body: request.body});
+        //console.log({authUser: authUser, dataValues: dataValues, body: request.body});
 
         return response.send(dataValues);
         //const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
@@ -128,31 +212,6 @@ router.delete("/:siteid/:id", async function (request, response) {
         return response.send('ok');
         /*
         const authResult = await gallery.deleteItem(config, siteid, id);
-        const result =  authResult.recordset;
-        return response.send(result);
-        */
-    }
-    else {
-        return response.status(403).send({
-            message: 'you do not have permission to access this / POST',
-          });
-    }
-});
-
-// update a gallery
-router.put("/:siteid/:id", async function (request, response) {
-    const siteid = request.params.siteid;
-    const authToken = LoginFunctions.getAuthenticationToken(request);
-    const authID = authToken || (request.headers.authid);
-    const id = request.body.id;
-
-    const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-
-    if (roleNames.indexOf('admin') > -1) {
-        return response.send('ok');
-        /*
-        const authResult = await gallery.updateItem(config, siteid, id, username, emailaddress);
         const result =  authResult.recordset;
         return response.send(result);
         */
