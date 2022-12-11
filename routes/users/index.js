@@ -85,14 +85,11 @@ router.post("/:siteid", async function (request, response) {
     if (authUser.RoleNames.indexOf('admin') > -1) {
        UserFactory.Set(request.body);
         const dataValues = UserFactory.Get();
-        return response.send(dataValues);
-/*
-        const authResult = await users.createUser(config, siteid, 
-            username, username, username, emailaddress, 1, 1, 0,
-            emailaddress, 1, 1, 1);
-        const result =  authResult.recordset;
+
+        const authResult = await users.createUser(config, siteid, authUser, dataValues);
+        const result =  authResult;
         return response.send(result);
-*/
+
     }
     else {
         return response.status(401).send({error: 'you\'re not authorized to access this'});

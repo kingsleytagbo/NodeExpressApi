@@ -99,7 +99,7 @@ router.post("/:siteid", async function (request, response) {
         const dataValues = BlogFactory.Get();
         
         const authResult = await blogs.createItem(config, siteid, authUser, dataValues);
-        const result =  authResult.recordset;
+        const result =  authResult;
         return response.send(result);
     }
     else {

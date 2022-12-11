@@ -150,10 +150,13 @@ const UserFunctions = {
 
     /*
         Creates a singLe user & associated roles in SQL Server
+                createUser: async (config, privateKeyID,
+            username, firstname, lastname, email, isonline, isapproved, islockedout,
+            password, statusid, createuserid, modifyuserid){
+                
+            }
     */
-    createUser: async (config, privateKeyID,
-        username, firstname, lastname, email, isonline, isapproved, islockedout,
-        password, statusid, createuserid, modifyuserid) => {
+    createUser: async (config, privateKeyID, user, data) => {
         privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
 
         try {
@@ -179,23 +182,26 @@ const UserFunctions = {
             query += ' FROM ITCC_WEBSITE WS JOIN ITCC_ROLE RL ';
             query += ' ON (WS.ITCC_WebsiteID = RL.ITCC_WebsiteID) ';
             query += ' WHERE ( (WS.PrivateKeyID = @PrivateKeyID) AND RL.NAME IN (' + roleNames + ' ) ); '
+            query += ' COMMIT TRANSACTION;';
 
-            query += ' SELECT @NEWID NEWID,  @SiteID SiteID; COMMIT;'
+            query += ' SELECT @NEWID NEWID,  @SiteID SiteID;'
 
             const request = new sql.Request();
             request.output('NewID', sql.Int);
             request.output('SiteID', sql.Int);
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('UserName', sql.NVarChar(64), username);
-            request.input('EmailAddress', sql.NVarChar(64), email);
-            request.input('Password', sql.NVarChar(64), password);
-            request.input('FirstName', sql.NVarChar(64), firstname);
-            request.input('LastName', sql.NVarChar(128), lastname);
-            request.input('StatusID', sql.Bit, 1);
-            request.input('IsApproved', sql.Bit, 1);
-            request.input('IsOnline', sql.Bit, 1);
-            request.input('IsLockedOut', sql.Bit, 1);
-            const result = await request.query(query);
+            request.input('UserName', sql.NVarChar(64), data.UserName);
+            request.input('EmailAddress', sql.NVarChar(64), data.EmailAddress);
+            request.input('Password', sql.NVarChar(64), data.Password);
+            request.input('FirstName', sql.NVarChar(64), data.FirstName);
+            request.input('LastName', sql.NVarChar(128), data.LastName);
+            request.input('StatusID', sql.Bit, -1);
+            request.input('IsApproved', sql.Bit, -1);
+            request.input('IsOnline', sql.Bit, -1);
+            request.input('IsLockedOut', sql.Bit, -1);
+
+            const authResult = await request.query(query);
+            const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
             return result;
 
         } catch (err) {
