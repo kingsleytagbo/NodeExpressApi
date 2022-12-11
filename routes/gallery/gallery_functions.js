@@ -91,9 +91,9 @@ const GalleryFunctions = {
                 let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
                 query += ' BEGIN TRAN; ';
                 query += ' INSERT INTO ITCC_Image (Name, Description, Slug, Category, Tags, Title, FilePath, FileGroup, ';
-                query += ' ITCC_WebsiteID, IsActive, CreateDate, ModifyDate, UpdateDate, ModifyAccountID, UpdateUserID, CreateAccountID )';
+                query += ' ITCC_WebsiteID, IsActive, CreateDate, ModifyDate, UpdateDate, ModifyAccountID, UpdateUserID, CreateAccountID, CreateUserID )';
                 query += '  VALUES (@Name, @Description, @Slug, @Category, @Tags, @Title, @FilePath, @FileGroup, ';
-                query += ' @SiteID, @IsActive, @CreateDate, @ModifyDate, @UpdateDate, @ModifyAccountID, @UpdateUserID, @CreateAccountID )';
+                query += ' @SiteID, @IsActive, @CreateDate, @ModifyDate, @UpdateDate, @ModifyAccountID, @UpdateUserID, @CreateAccountID, @CreateAccountID )';
         
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT SCOPE_IDENTITY() NEWID;';

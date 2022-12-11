@@ -127,7 +127,7 @@ router.post("/:siteid", async function (request, response) {
                 console.log({ dataValues: dataValues });
 
                 const authResult = gallery.createItem(config, siteid, authUser, dataValues);
-                authResult.then(() => {
+                authResult.then((result) => {
                     return response.send(result);
                 });
             }
