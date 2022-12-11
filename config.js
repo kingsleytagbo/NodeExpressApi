@@ -8,7 +8,8 @@ const config = [
         privateKeyID: 'your multi-tenant unique identifier',
         options: {
             enableArithAbort: true
-        }
+        },
+        fileUploadDirectory: ''
     }
     
 ];

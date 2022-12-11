@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const path = require('path');
 const configs = require('../../config_functions');
 const gallery = require('./gallery_functions');
 const formidable = require("formidable");
@@ -35,6 +36,7 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const offset = (pageNum - 1) * pageSize;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
+
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
@@ -82,10 +84,11 @@ router.post("/:siteid", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    const fileUploadDirectory =  config.fileUploadDirectory || path.join(__dirname, "public", "files");
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         const form = new formidable.IncomingForm({
-            uploadDir: 'C:\\Users\\kings\\Downloads\\uploads',
+            uploadDir: fileUploadDirectory,
             keepExtensions: true,
         });
 
@@ -146,15 +149,17 @@ router.put("/:siteid/:id", async function (request, response) {
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const body = request.body;
+
+    const config = configs.find(siteid);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    const fileUploadDirectory =  config.fileUploadDirectory || path.join(__dirname, "public", "files");
+
     const form = new formidable.IncomingForm({
-        uploadDir: 'C:\\Users\\kings\\Downloads\\uploads',
+        uploadDir: fileUploadDirectory,
         keepExtensions: true,
     });
     form.parse(request, function (err, fields, files) {
     });
-
-    const config = configs.find(siteid);
-    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
         GalleryFactory.Set(request.body);
