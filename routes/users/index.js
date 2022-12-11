@@ -60,7 +60,8 @@ router.get("/:siteid/:id", async function (request, response) {
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         const authResult = await users.getUser(config, siteid, id);
-        const result =  authResult.recordset;
+        const result =  (authResult.recordset && (authResult.recordset.length > 0))
+        ? authResult.recordset[0] : null;
         return response.send(result);
     }
     else {
