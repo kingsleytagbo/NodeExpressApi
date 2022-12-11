@@ -2,7 +2,7 @@
 const sql = require("mssql");
 const roleNames = "'anonymous', 'subscriber'";
 
-const ImageFunctions = {
+const GalleryFunctions = {
 
     /*
             SELECT a paged list of Images & associated roles from SQL Server
@@ -59,31 +59,104 @@ const ImageFunctions = {
         }
     },
 
+        /*
+        Creates a singLe Image & associated roles in SQL Server
+    */
+        createItem: async (config, privateKeyID, user, data) => {
+            privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
+    
+            try {
+                await sql.connect(config);
+                const request = new sql.Request();
+                request.input('Name', sql.NVarChar(255), data.Name);
+                request.input('Description', sql.NVarChar(), data.Description);
+                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
+                request.input('Category', sql.NVarChar(), (data.Category || ''));
+                request.input('Tags', sql.NVarChar(), (data.Tags || ''));
+                request.input('Title', sql.NVarChar(255), (data.Title || ''));
+
+                request.input('FilePath', sql.NVarChar(383), (data.PostSummary || {}));
+                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
+                request.input('IsActive', sql.Bit, 1);
+                request.input('CreateDate', sql.DateTime, data.CreateDate);
+                request.input('ModifyDate', sql.DateTime, data.ModifyDate);
+                request.input('UpdateDate', sql.DateTime, data.ModifyDate);
+                request.input('ModifyUserID', sql.VarChar(), user.ITCC_UserID);
+                request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
+                request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
+
+                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+    
+                let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
+                query += ' BEGIN TRAN; ';
+                query += ' INSERT INTO ITCC_Image (Name, Description, Slug, Category, Tags, Title, FilePath, ';
+                query += ' ITCC_WebsiteID, IsActive, CreateDate, ModifyDate, UpdateDate, ModifyUserID, UpdateUserID, CreateAccountID )';
+                query += '  VALUES (@Name, @Description, @Slug, @Category, @Tags, @Title, @FilePath, ';
+                query += ' @SiteID, @IsActive, @CreateDate, @ModifyDate, @UpdateDate, @ModifyUserID, @UpdateUserID, @CreateAccountID )';
+        
+                query += ' COMMIT TRANSACTION;';
+                query += ' SELECT SCOPE_IDENTITY() NEWID;';
+        
+                const authResult = await request.query(query);
+                const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+    
+                console.log({result: result});
+                return result;
+    
+            } catch (err) {
+                console.log({PostImage: err})
+                throw err
+            }
+        },
+
     /*
         Updates a singLe Image's information on SQL Server
     */
-    updateItem: async (config, privateKeyID, id, Imagename, emailaddress) => {
-        privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
-
-        try {
-            await sql.connect(config);
-            let query = ' UPDATE ITCC_Image SET ';
-            query += ' Imagename = @Imagename, EmailAddress = @EmailAddress ';
-            query += ' WHERE ( ' +
-                ' ( ITCC_ImageID = @ID ) ' +
-                '); SELECT @@ROWCOUNT; ';
-
-            const request = new sql.Request();
-            request.input('ID', sql.Int, id);
-            request.input('Imagename', sql.NVarChar(64), Imagename);
-            request.input('EmailAddress', sql.NVarChar(64), emailaddress);
-            const result = await request.query(query);
-            return result;
-
-        } catch (err) {
-            throw err
-        }
-    },
+        updateItem: async (config, privateKeyID, user, data) => {
+            privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
+    
+            try {
+                await sql.connect(config);
+                const request = new sql.Request();
+                request.input('Name', sql.VarChar(125), data.Name);
+                request.input('Description', sql.VarChar(), data.Description);
+                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
+                request.input('ImageType', sql.VarChar(), (data.ImageType || ''));
+                request.input('PostDate', sql.DateTime2, data.PostDate);
+                request.input('SortOrder', sql.Int, (data.SortOrder || 0));
+                request.input('Category', sql.VarChar(), (data.Category || ''));
+                request.input('Tags', sql.VarChar(), (data.Tags || ''));
+                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
+                request.input('ITCC_ImageID', sql.Int, data.ITCC_ImageID);
+                request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
+                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
+                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('CreateDate', sql.DateTime, data.CreateDate);
+                request.input('ModifyDate', sql.DateTime, data.ModifyDate);
+                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
+                request.input('RoleName', sql.VarChar(), data.RoleName);
+                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+    
+                let query = ' ';
+                query += ' BEGIN TRAN; ';
+                query += ' UPDATE ITCC_Image SET Name=@Name, Description=@Description, Slug=@Slug, ImageType=@ImageType, ';
+                query += ' PostDate = @PostDate, Category=@Category, Tags=@Tags, ITCC_StatusID=@ITCC_StatusID, ModifyDate = @ModifyDate, SortOrder = @SortOrder ';
+                query += ' WHERE ITCC_ImageID = @ITCC_ImageID; '; 
+                query += ' COMMIT TRANSACTION;';
+                query += ' SELECT @@ROWCOUNT;';
+        
+                console.log(query)
+                const authResult = await request.query(query);
+                const result = data;
+    
+                console.log({result: result});
+                return result;
+    
+            } catch (err) {
+                console.log({PostImage: err})
+                throw err
+            }
+        },
 
     /*
         Deletes a singLe non-admin Image's information on SQL Server  
@@ -93,39 +166,12 @@ const ImageFunctions = {
         try {
             await sql.connect(config);
 
-            let query = ' BEGIN TRAN; ';
-
-            // DELETE ImageROLE
-            query += ' DELETE UR ';
-            query += ' FROM [ITCC_Image] US (NOLOCK) JOIN [ITCC_WebsiteImage] WU (NOLOCK) ';
-            query += ' ON (US.ITCC_ImageID = WU.ITCC_ImageID) ';
-            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ImageROLE] UR (NOLOCK) ON (WS.ITCC_WebsiteID = UR.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ROLE] IR (NOLOCK) ON (UR.ITCC_ROLEID = IR.ITCC_ROLEID) ';
+            let query = ' DELETE US ';
+            query += ' FROM [ITCC_Image] US ';
+            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (US.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
             query += ' WHERE ( ' +
-                ' (UR.ITCC_ImageID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) AND (UR.ITCC_ImageID > 1) ' +
-                '); ';
-
-
-            // DELETE WEBSITEImage
-            query += ' DELETE WU ';
-            query += ' FROM [ITCC_Image] US (NOLOCK) JOIN [ITCC_WebsiteImage] WU (NOLOCK) ';
-            query += ' ON (US.ITCC_ImageID = WU.ITCC_ImageID) ';
-            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ImageROLE] UR (NOLOCK) ON (WS.ITCC_WebsiteID = UR.ITCC_WebsiteID) ';
-            query += ' JOIN [ITCC_ROLE] IR (NOLOCK) ON (UR.ITCC_ROLEID = IR.ITCC_ROLEID) ';
-            query += ' WHERE ( ' +
-                ' (WU.ITCC_ImageID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) AND (WU.ITCC_ImageID > 1) ' +
-                '); ';
-
-            // DELETE Image
-            query += ' DELETE US ';
-            query += ' FROM [ITCC_Image] US (NOLOCK) ';
-            query += ' WHERE ( ' +
-                ' (US.ITCC_ImageID = @ID) AND (US.ITCC_ImageID > 1) ' +
-                '); ';
-
-            query += ' COMMIT';
+                ' (US.ITCC_ImageID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
+                ') ';
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
@@ -136,62 +182,7 @@ const ImageFunctions = {
         } catch (err) {
             throw err
         }
-    },
-
-    /*
-        Creates a singLe Image & associated roles in SQL Server
-    */
-    createItem: async (config, privateKeyID,
-        Imagename, firstname, lastname, email, isonline, isapproved, islockedout,
-        password, statusid, createImageid, modifyImageid) => {
-        privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
-
-        try {
-            await sql.connect(config);
-            let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
-            query += ' BEGIN TRAN; ';
-            query += ' INSERT INTO ITCC_Image (';
-            query += ' ImageName, Password, FirstName, LastName, EmailAddress, ';
-            query += ' IsOnline, IsApproved, IsLockedOut, ITCC_StatusID, ';
-            query += ' ImageID, ImageToken, CreateDate, CreateImageID, ModifyDate, ModifyImageID';
-            query += ' ) ';
-            query += ' VALUES ( ' +
-                ' @ImageName, @Password, @FirstName, @LastName, @EmailAddress, ' +
-                ' @IsOnline, @IsApproved, @IsLockedOut, @StatusID, ' +
-                ' NewID(), NewID(), getdate(), 1, getdate(), 1' +
-                '); SELECT @NEWID = SCOPE_IDENTITY();';
-
-            query += ' INSERT INTO ITCC_WEBSITEImage (ITCC_WebsiteID, ITCC_ImageID, CreateDate, CreateImageID, ModifyDate, ModifyImageID )';
-            query += ' SELECT  @SiteID, @NEWID, getdate(), 1, getdate(), 1';
-
-            query += ' INSERT INTO ITCC_ImageROLE (ITCC_WebsiteID, ITCC_ImageID, ITCC_ROLEID )';
-            query += ' SELECT DISTINCT @SiteID, @NEWID, RL.ITCC_ROLEID ';
-            query += ' FROM ITCC_WEBSITE WS JOIN ITCC_ROLE RL ';
-            query += ' ON (WS.ITCC_WebsiteID = RL.ITCC_WebsiteID) ';
-            query += ' WHERE ( (WS.PrivateKeyID = @PrivateKeyID) AND RL.NAME IN (' + roleNames + ' ) ); '
-
-            query += ' SELECT @NEWID NEWID,  @SiteID SiteID; COMMIT;'
-
-            const request = new sql.Request();
-            request.output('NewID', sql.Int);
-            request.output('SiteID', sql.Int);
-            request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('ImageName', sql.NVarChar(64), Imagename);
-            request.input('EmailAddress', sql.NVarChar(64), email);
-            request.input('Password', sql.NVarChar(64), password);
-            request.input('FirstName', sql.NVarChar(64), firstname);
-            request.input('LastName', sql.NVarChar(128), lastname);
-            request.input('StatusID', sql.Bit, 1);
-            request.input('IsApproved', sql.Bit, 1);
-            request.input('IsOnline', sql.Bit, 1);
-            request.input('IsLockedOut', sql.Bit, 1);
-            const result = await request.query(query);
-            return result;
-
-        } catch (err) {
-            throw err
-        }
-    },
+    }
 };
 
-module.exports = ImageFunctions;
+module.exports = GalleryFunctions;
