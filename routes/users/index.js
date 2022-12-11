@@ -104,12 +104,11 @@ router.delete("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await login.getUserRolesByAuthToken(config, siteid, authID);
+    const authUser = await login.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
         const authResult = await users.deleteUser(config, siteid, id);
-        const result =  authResult.recordset;
-        return response.send(result);
+        return response.send(id);
     }
     else {
         return response.status(401).send({error: 'you\'re not authorized to access this'});
