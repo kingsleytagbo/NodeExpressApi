@@ -33,23 +33,18 @@ router.get("/:siteid/page/:pagenum?", async function (request, response) {
     const pageSize = 20; 
     const offset = (pageNum - 1) * pageSize;
 
-    console.log({
-        'list gallerys': {
-            params: request.params, authID: authID,  authToken:  authToken
-        }
-    })
-
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const itemsResult = await gallery.getItems(config, siteid, offset, pageSize);
-    const result = itemsResult.recordset;
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames && roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
+        const itemsResult = await gallery.getItems(config, siteid, offset, pageSize);
+        const result = itemsResult.recordset;
         return response.status(200).send(result);
     }
     else {
-        // return a trimmed down result
-        return response.status(200).send(result);
+        return response.status(403).send({
+            message: 'you do not have permission to access this / POST',
+          });
     }
 
 });
@@ -61,16 +56,10 @@ router.get("/:siteid/:id", async function (request, response) {
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
-    console.log({
-        'one gallery': {
-            params: request.params, authid: authID, id: id
-        }
-    })
-
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames && roleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1) {
         const authResult = await gallery.getItem(config, siteid, id);
         const result =  (authResult.recordset && (authResult.recordset.length > 0))
         ? authResult.recordset[0] : null;
@@ -89,10 +78,12 @@ router.post("/:siteid", async function (request, response) {
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
-    const firstname = request.body.firstname;
-    const lastname = request.body.lastname;
-    const username = request.body.username;
-    const emailaddress = request.body.emailaddress;
+
+    console.log({
+        'post gallery': {
+            params: request.params, body: request.body
+        }
+    })
 
     const config = configs.find(siteid); 
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
@@ -102,7 +93,7 @@ router.post("/:siteid", async function (request, response) {
         const dataValues = GalleryFactory.Get();
         console.log({authUser: authUser, dataValues: dataValues, body: request.body});
 
-        return response.send('ok');
+        return response.send(dataValues);
         //const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
         /*
         const authResult = await gallery.createItem(config, siteid, 
@@ -154,16 +145,17 @@ router.put("/:siteid/:id", async function (request, response) {
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const id = request.body.id;
-    const username = request.body.username;
-    const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
 
     if (roleNames.indexOf('admin') > -1) {
+        return response.send('ok');
+        /*
         const authResult = await gallery.updateItem(config, siteid, id, username, emailaddress);
         const result =  authResult.recordset;
         return response.send(result);
+        */
     }
     else {
         return response.status(403).send({
