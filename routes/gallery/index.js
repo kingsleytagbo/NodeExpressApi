@@ -124,8 +124,6 @@ router.post("/:siteid", async function (request, response) {
                 dataValues.ModifyAccountID = authUser.ITCC_UserID;
                 dataValues.UpdateUserID = authUser.ITCC_UserID;
 
-                console.log({ dataValues: dataValues });
-
                 const authResult = gallery.createItem(config, siteid, authUser, dataValues);
                 authResult.then((result) => {
                     return response.send(result);
