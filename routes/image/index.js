@@ -21,6 +21,7 @@ const GalleryFactory = {
 };
 
 // get one image
+// http://localhost:3011/api/mage/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/d6595df836b4075b953fb9b00.jpg
 // http://localhost:3011/api/image/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/a96b842cb21d1aa627aa93c00.png
 router.get("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
@@ -32,12 +33,6 @@ router.get("/:siteid/:id", async function (request, response) {
     const blankImagePath = path.join(__dirname, "public", "files", "blank_image.png");
 
     fs.exists(filePath, function (exists) {
-        console.log(
-            {
-                filePath: filePath, blankImagePath: blankImagePath, id: id,
-                uploadDir: uploadDir, exists: exists
-            }
-        )
       if (!exists) {
         response.writeHead(200, {
           'Content-Type': 'image/jpg',

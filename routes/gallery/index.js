@@ -98,11 +98,6 @@ router.post("/:siteid", async function (request, response) {
         });
 
         form.parse(request, function (err, fields, files) {
-            console.log(
-                {
-                    err: err, fields: fields, files: files
-                }
-            )
             if (err) {
                 return response.status(403).send({
                     message: 'you do not have permission to access this / POST',
@@ -121,7 +116,7 @@ router.post("/:siteid", async function (request, response) {
                 dataValues.IsActive = 1;
                 dataValues.Slug = newFilename;
                 dataValues.FilePath = filepath;
-                dataValues.PublishUrl = '/api/image/' + siteid + '/' + newFilename;
+                dataValues.PublishUrl = '/image/' + siteid + '/' + newFilename;
                 dataValues.Title = originalFilename || newFilename;
 
                 const newTags = (size + ', ' + mimetype);
