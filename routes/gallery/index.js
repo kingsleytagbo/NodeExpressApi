@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const path = require('path');
+const fs = require('fs');
 const configs = require('../../config_functions');
 const gallery = require('./gallery_functions');
 const formidable = require("formidable");
@@ -108,7 +109,6 @@ router.post("/:siteid", async function (request, response) {
                 });
             }
             else {
-                console.log({ Files: files })
                 const file = files.file;
                 const filepath = file.filepath;
                 const newFilename = file.newFilename;
@@ -190,15 +190,9 @@ router.delete("/:siteid/:id", async function (request, response) {
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
-        GalleryFactory.Set(request.body);
-        const dataValues = GalleryFactory.Get();
-
-        return response.send('ok');
-        /*
         const authResult = await gallery.deleteItem(config, siteid, id);
         const result =  authResult.recordset;
-        return response.send(result);
-        */
+        return response.send(id);
     }
     else {
         return response.status(403).send({
