@@ -116,7 +116,7 @@ router.post("/:siteid", async function (request, response) {
                 dataValues.IsActive = 1;
                 dataValues.Slug = newFilename;
                 dataValues.FilePath = filepath;
-                dataValues.PublishUrl = '/image/' + siteid + '/' + newFilename;
+                dataValues.PublishUrl = '/' + newFilename;
                 dataValues.Title = originalFilename || newFilename;
 
                 const newTags = (size + ', ' + mimetype);
