@@ -20,8 +20,7 @@ const UserFactory = {
 
 
 
-//  http://localhost:3010/api/gallery/FEA91F56-CBE3-4138-8BB6-62F9A5808D57/1
-//  http://localhost:3010/api/users/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1
+// http://localhost:3011/api/blog/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1?pagenum=1
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
 router.get("/:siteid/page/:pagenum?", async function (request, response) {
