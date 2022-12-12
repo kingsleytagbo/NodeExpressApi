@@ -77,7 +77,7 @@ const GalleryFunctions = {
 
                 request.input('FilePath', sql.NVarChar(383), (data.FilePath || ''));
                 request.input('FileGroup', sql.NVarChar(255), (data.FileGroup || ''));
-                request.input('PublishUrl', sql.NVarChar(383). (data.PublishUrl || ''));
+                request.input('PublishUrl', sql.NVarChar(383), (data.PublishUrl || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
                 request.input('IsActive', sql.Bit, 1);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
