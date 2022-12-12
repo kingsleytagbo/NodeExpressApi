@@ -28,12 +28,12 @@ const GalleryFactory = {
 //  http://localhost:3010/api/users/1DC52158-0175-479F-8D7F-D93FC7B1CAA4/page/1
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
-router.get("/:siteid/page/:pagenum?", async function (request, response) {
+router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response) {
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const pageNum = (request.params.pagenum) ? request.params.pagenum : 1;
-    const pageSize = 20;
+    const pageSize = (request.params.pagesize) ? request.params.pagesize : 10; 
     const offset = (pageNum - 1) * pageSize;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);

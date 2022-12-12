@@ -28,11 +28,8 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const pageNum = (request.params.pagenum) ? request.params.pagenum : 1;
-    const pageSize = (request.params.pagesize) ? request.params.pagesize : 20; 
+    const pageSize = (request.params.pagesize) ? request.params.pagesize : 10; 
     const offset = (pageNum - 1) * pageSize;
-
-    console.log({pagenum: pageNum, pageSize: pageSize})
-
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
