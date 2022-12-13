@@ -144,11 +144,9 @@ const BlogFunctions = {
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT @@ROWCOUNT;';
         
-                console.log(query)
                 const authResult = await request.query(query);
                 const result = data;
     
-                console.log({result: result});
                 return result;
     
             } catch (err) {

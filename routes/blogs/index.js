@@ -53,14 +53,6 @@ router.get("/:siteid/:id", async function (request, response) {
     const authID = authToken || (request.headers.authid);
     const id = request.params.id;
 
-    /*
-    console.log({
-        'one blog': {
-            params: request.params, authid: authID, id: id, authToken: authToken
-        }
-    })
-    */
-
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
     const authResult = await blogs.getItem(config, siteid, id);

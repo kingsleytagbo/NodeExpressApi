@@ -119,38 +119,37 @@ const GalleryFunctions = {
             try {
                 await sql.connect(config);
                 const request = new sql.Request();
-                request.input('Name', sql.VarChar(125), data.Name);
-                request.input('Description', sql.VarChar(), data.Description);
-                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
-                request.input('ImageType', sql.VarChar(), (data.ImageType || ''));
-                request.input('PostDate', sql.DateTime2, data.PostDate);
-                request.input('SortOrder', sql.Int, (data.SortOrder || 0));
-                request.input('Category', sql.VarChar(), (data.Category || ''));
-                request.input('Tags', sql.VarChar(), (data.Tags || ''));
-                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
                 request.input('ITCC_ImageID', sql.Int, data.ITCC_ImageID);
-                request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
+                request.input('Name', sql.NVarChar(255), data.Name);
+                request.input('Description', sql.NVarChar(), data.Description);
+                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
+                request.input('Category', sql.NVarChar(), (data.Category || ''));
+                request.input('Tags', sql.NVarChar(), (data.Tags || ''));
+                request.input('Title', sql.NVarChar(255), (data.Title || ''));
+
+                request.input('FilePath', sql.NVarChar(383), (data.FilePath || ''));
+                request.input('FileGroup', sql.NVarChar(255), (data.FileGroup || ''));
+                request.input('PublishUrl', sql.NVarChar(383), (data.PublishUrl || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
-                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('IsActive', sql.Bit, 1);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-                request.input('ModifyAccountID', sql.VarChar(), data.ModifyAccountID);
-                request.input('RoleName', sql.VarChar(), data.RoleName);
-                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+                request.input('UpdateDate', sql.DateTime, data.ModifyDate);
+                request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
+                request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
+                request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
     
                 let query = ' ';
                 query += ' BEGIN TRAN; ';
-                query += ' UPDATE ITCC_Image SET Name=@Name, Description=@Description, Slug=@Slug, ImageType=@ImageType, ';
-                query += ' PostDate = @PostDate, Category=@Category, Tags=@Tags, ITCC_StatusID=@ITCC_StatusID, ModifyDate = @ModifyDate, SortOrder = @SortOrder ';
+                query += ' UPDATE ITCC_Image SET Name=@Name, Description=@Description, Slug=@Slug, Category=@Category, Tags=@Tags, Title=@Title,  ';
+                query += ' FilePath=@FilePath, FileGroup=@FileGroup, PublishUrl=@PublishUrl,  ModifyDate=@ModifyDate, UpdateDate=@ModifyDate, ModifyAccountID=@ModifyAccountID, UpdateUserID=@ModifyAccountID';
                 query += ' WHERE ITCC_ImageID = @ITCC_ImageID; '; 
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT @@ROWCOUNT;';
         
-                console.log(query)
                 const authResult = await request.query(query);
                 const result = data;
     
-                console.log({result: result});
                 return result;
     
             } catch (err) {
