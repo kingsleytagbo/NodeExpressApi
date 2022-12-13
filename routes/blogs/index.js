@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const configs = require('../../config_functions'); //require('../../config');
 const blogs = require('./blog_functions');
-const login = require('../login/login_functions');
+const SharedFunctions = require('../../shared/shared_functions');
 const LoginFunctions = require('../login/login_functions');
 
 const BlogFactory = {
@@ -81,6 +81,10 @@ router.post("/:siteid", async function (request, response) {
     if (authUser.RoleNames.indexOf('admin') > -1) {
         BlogFactory.Set(request.body);
         const dataValues = BlogFactory.Get();
+
+        if(!dataValues.Slug || dataValues.Slug.trim().length === 0){
+            dataValues.Slug = SharedFunctions.slugify(dataValues.Name);
+        }
         
         const authResult = await blogs.createItem(config, siteid, authUser, dataValues);
         const result =  authResult;
@@ -105,6 +109,10 @@ router.put("/:siteid/:id", async function (request, response) {
     if (authUser.RoleNames.indexOf('admin') > -1) {
         BlogFactory.Set(request.body);
         const dataValues = BlogFactory.Get();
+
+        if(!dataValues.Slug || dataValues.Slug.trim().length === 0){
+            dataValues.Slug = SharedFunctions.slugify(dataValues.Name);
+        }
 
         const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
         const result =  authResult.recordset;

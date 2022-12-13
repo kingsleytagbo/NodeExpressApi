@@ -1,6 +1,5 @@
 
 const sql = require("mssql");
-const roleNames = "'anonymous', 'subscriber'";
 
 const BlogFunctions = {
 
@@ -67,22 +66,22 @@ const BlogFunctions = {
             try {
                 await sql.connect(config);
                 const request = new sql.Request();
-                request.input('Name', sql.VarChar(125), data.Name);
-                request.input('Description', sql.VarChar(), data.Description);
-                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
-                request.input('BlogType', sql.VarChar(), (data.BlogType || ''));
+                request.input('Name', sql.NVarChar(125), data.Name);
+                request.input('Description', sql.NVarChar(), data.Description);
+                request.input('Slug', sql.NVarChar(256), (data.Slug || ''));
+                request.input('BlogType', sql.NVarChar(), (data.BlogType || ''));
                 request.input('PostDate', sql.DateTime2, data.PostDate);
                 request.input('SortOrder', sql.Int, (data.SortOrder || 0));
-                request.input('Category', sql.VarChar(), (data.Category || ''));
-                request.input('Tags', sql.VarChar(), (data.Tags || ''));
-                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
-                request.input('ITCC_UserID', sql.VarChar(), user.ITCC_UserID);
-                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
-                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('Category', sql.NVarChar(), (data.Category || ''));
+                request.input('Tags', sql.NVarChar(), (data.Tags || ''));
+                request.input('PostSummary', sql.NVarChar(), (data.PostSummary || {}));
+                request.input('ITCC_UserID', sql.NVarChar(), user.ITCC_UserID);
+                request.input('SiteID', sql.NVarChar(), data.ITCC_WebsiteID);
+                request.input('ITCC_StatusID', sql.NVarChar(), 2);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
-                request.input('RoleName', sql.VarChar(), data.RoleName);
+                request.input('ModifyUserID', sql.NVarChar(), data.ModifyUserID);
+                request.input('RoleName', sql.NVarChar(), data.RoleName);
                 request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
     
                 let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
@@ -114,23 +113,23 @@ const BlogFunctions = {
             try {
                 await sql.connect(config);
                 const request = new sql.Request();
-                request.input('Name', sql.VarChar(125), data.Name);
-                request.input('Description', sql.VarChar(), data.Description);
-                request.input('Slug', sql.VarChar(96), (data.Slug || ''));
-                request.input('BlogType', sql.VarChar(), (data.BlogType || ''));
+                request.input('Name', sql.NVarChar(125), data.Name);
+                request.input('Description', sql.NVarChar(), data.Description);
+                request.input('Slug', sql.NVarChar(256), (data.Slug || ''));
+                request.input('BlogType', sql.NVarChar(), (data.BlogType || ''));
                 request.input('PostDate', sql.DateTime2, data.PostDate);
                 request.input('SortOrder', sql.Int, (data.SortOrder || 0));
-                request.input('Category', sql.VarChar(), (data.Category || ''));
-                request.input('Tags', sql.VarChar(), (data.Tags || ''));
-                request.input('PostSummary', sql.VarChar(), (data.PostSummary || {}));
+                request.input('Category', sql.NVarChar(), (data.Category || ''));
+                request.input('Tags', sql.NVarChar(), (data.Tags || ''));
+                request.input('PostSummary', sql.NVarChar(), (data.PostSummary || {}));
                 request.input('ITCC_BlogID', sql.Int, data.ITCC_BlogID);
                 request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
-                request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
-                request.input('ITCC_StatusID', sql.VarChar(), 2);
+                request.input('SiteID', sql.NVarChar(), data.ITCC_WebsiteID);
+                request.input('ITCC_StatusID', sql.NVarChar(), 2);
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-                request.input('ModifyUserID', sql.VarChar(), data.ModifyUserID);
-                request.input('RoleName', sql.VarChar(), data.RoleName);
+                request.input('ModifyUserID', sql.NVarChar(), data.ModifyUserID);
+                request.input('RoleName', sql.NVarChar(), data.RoleName);
                 request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
     
                 let query = ' ';
