@@ -132,22 +132,19 @@ const GalleryFunctions = {
                 request.input('PublishUrl', sql.NVarChar(383), (data.PublishUrl || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
                 request.input('IsActive', sql.Bit, 1);
-                request.input('CreateDate', sql.DateTime, data.CreateDate);
-                request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-                request.input('UpdateDate', sql.DateTime, data.ModifyDate);
                 request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
                 request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
                 request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
 
                 console.log({
                     data: data, user: user
-                }
-                )
+                })
     
                 let query = ' ';
                 query += ' BEGIN TRAN; ';
                 query += ' UPDATE ITCC_Image SET Name=@Name, Description=@Description, Slug=@Slug, Category=@Category, Tags=@Tags, Title=@Title,  ';
-                query += ' FilePath=@FilePath, FileGroup=@FileGroup, PublishUrl=@PublishUrl,  ModifyAccountID=@ModifyAccountID, UpdateUserID=@ModifyAccountID';
+                query += ' FilePath=@FilePath, FileGroup=@FileGroup, PublishUrl=@PublishUrl,  ModifyAccountID=@ModifyAccountID, UpdateUserID=@ModifyAccountID, ';
+                query += ' UpdateDate = GetDate()';
                 query += ' WHERE ITCC_ImageID = @ITCC_ImageID; '; 
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT @@ROWCOUNT;';
