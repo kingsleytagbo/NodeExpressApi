@@ -24,12 +24,10 @@ const GalleryFunctions = {
             request.input('Offset', sql.Int, offset);
             request.input('PageSize', sql.Int, pageSize);
 
-            //console.log({getImages: query, privateKeyID: privateKeyID, offset: offset, pageSize: pageSize});
             const result = await request.query(query);
             return result;
 
         } catch (err) {
-            //console.log({getImages: err});
             throw err
         }
     },
@@ -105,7 +103,6 @@ const GalleryFunctions = {
                 return result;
     
             } catch (err) {
-                console.log({PostImage: err})
                 throw err
             }
         },
@@ -135,10 +132,6 @@ const GalleryFunctions = {
                 request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
                 request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
                 request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
-
-                console.log({
-                    data: data, user: user
-                })
     
                 let query = ' ';
                 query += ' BEGIN TRAN; ';
@@ -155,7 +148,6 @@ const GalleryFunctions = {
                 return result;
     
             } catch (err) {
-                console.log({PostImage: err})
                 throw err
             }
         },
