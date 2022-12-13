@@ -138,11 +138,16 @@ const GalleryFunctions = {
                 request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
                 request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
                 request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
+
+                console.log({
+                    data: data, user: user
+                }
+                )
     
                 let query = ' ';
                 query += ' BEGIN TRAN; ';
                 query += ' UPDATE ITCC_Image SET Name=@Name, Description=@Description, Slug=@Slug, Category=@Category, Tags=@Tags, Title=@Title,  ';
-                query += ' FilePath=@FilePath, FileGroup=@FileGroup, PublishUrl=@PublishUrl,  ModifyDate=@ModifyDate, UpdateDate=@ModifyDate, ModifyAccountID=@ModifyAccountID, UpdateUserID=@ModifyAccountID';
+                query += ' FilePath=@FilePath, FileGroup=@FileGroup, PublishUrl=@PublishUrl,  ModifyAccountID=@ModifyAccountID, UpdateUserID=@ModifyAccountID';
                 query += ' WHERE ITCC_ImageID = @ITCC_ImageID; '; 
                 query += ' COMMIT TRANSACTION;';
                 query += ' SELECT @@ROWCOUNT;';
