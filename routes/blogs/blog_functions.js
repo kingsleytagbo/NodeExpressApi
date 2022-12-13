@@ -24,7 +24,6 @@ const BlogFunctions = {
             request.input('Offset', sql.Int, offset);
             request.input('PageSize', sql.Int, pageSize);
 
-            //console.log({getBlogs: query, privateKeyID: privateKeyID, offset: offset, pageSize: pageSize});
             const result = await request.query(query);
             return result;
 
@@ -99,11 +98,9 @@ const BlogFunctions = {
                 const authResult = await request.query(query);
                 const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
     
-                console.log({result: result});
                 return result;
     
             } catch (err) {
-                console.log({PostBlog: err})
                 throw err
             }
         },
@@ -150,7 +147,6 @@ const BlogFunctions = {
                 return result;
     
             } catch (err) {
-                console.log({PostBlog: err})
                 throw err
             }
         },
