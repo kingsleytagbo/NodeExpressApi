@@ -101,21 +101,22 @@ const BlogFunctions = {
             request.input('Category', sql.NVarChar(), (data.Category || ''));
             request.input('Tags', sql.NVarChar(), (data.Tags || ''));
             request.input('PostSummary', sql.NVarChar(), (data.PostSummary || {}));
-            request.input('ITCC_UserID', sql.NVarChar(), user.ITCC_UserID);
-            request.input('SiteID', sql.NVarChar(), data.ITCC_WebsiteID);
-            request.input('ITCC_StatusID', sql.NVarChar(), 2);
+            request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
+            request.input('SiteID', sql.Int, data.ITCC_WebsiteID);
+            request.input('ITCC_StatusID', sql.Int, 2);
             request.input('CreateDate', sql.DateTime, data.CreateDate);
             request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-            request.input('ModifyUserID', sql.NVarChar(), data.ModifyUserID);
+            request.input('ModifyUserID', sql.Int, data.ModifyUserID);
             request.input('RoleName', sql.NVarChar(), data.RoleName);
+            request.input('Author', sql.NVarChar(256), user.FirstName + ' ' + user.LastName);
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
 
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
             query += ' INSERT INTO ITCC_BLOG (Name, Description, Slug, BlogType, Permalink, PostDate, Category, Tags, PostSummary, ';
-            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, ModifyUserID, RoleName, SortOrder )';
+            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, ModifyUserID, RoleName, SortOrder, Author )';
             query += '  VALUES (@Name, @Description, @Slug, @BlogType, NEWID(), @PostDate, @Category, @Tags, @PostSummary, ';
-            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ModifyUserID, @RoleName, @SortOrder )';
+            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ModifyUserID, @RoleName, @SortOrder, @Author )';
 
             query += ' COMMIT TRANSACTION;';
             query += ' SELECT SCOPE_IDENTITY() NEWID;';
