@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const configs = require('../../config_functions'); //require('../../config');
 const blogs = require('./blog_functions');
+const comments = require('../comment/comment_functions');
 const SharedFunctions = require('../../shared/shared_functions');
 const LoginFunctions = require('../login/login_functions');
 
@@ -76,9 +77,10 @@ router.get("/:siteid/slug/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const authResult = await blogs.getItemBySlug(config, siteid, id);
-    const result = (authResult.recordset && (authResult.recordset.length > 0))
-        ? authResult.recordset[0] : null;
+    
+    const blogResult = await blogs.getItemBySlug(config, siteid, id);
+    const commentResult = await comments.getItemsBySlug(config, siteid, id);
+    const result = Object.assign(blogResult, {Comments: commentResult});
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         return response.send(result);

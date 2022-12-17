@@ -73,8 +73,10 @@ const BlogFunctions = {
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('Slug', sql.NVarChar(256), slug);
-            const result = await request.query(query);
+            request.input('Slug', sql.NVarChar(256), (slug || ''));
+            const blogResult = await request.query(query);
+            const result = (blogResult.recordset && blogResult.recordset.length > 0)
+                            ? blogResult.recordset[0] : null;
             return result;
 
         } catch (err) {

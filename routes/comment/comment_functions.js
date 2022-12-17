@@ -61,21 +61,23 @@ const CommentFunctions = {
     /*
     SELECTS a singLe Comment By Slug from SQL Server
 */
-    getItemBySlug: async (config, privateKeyID, slug) => {
+    getItemsBySlug: async (config, privateKeyID, slug) => {
 
         try {
             await sql.connect(config);
             let query = ' SELECT DISTINCT US.* ';
             query += ' FROM [ITCC_Comment] US ';
+            query += ' JOIN [ITCC_Blog] BG (NOLOCK) ON (US.ITCC_PostID = BG.ITCC_BlogID) ';
             query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (US.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
             query += ' WHERE ( ' +
-                ' (US.Slug = @Slug) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
+                ' ( LOWER(TRIM(BG.Slug)) = LOWER(TRIM(@Slug)) ) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
                 ') ';
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('Slug', sql.NVarChar(256), slug);
-            const result = await request.query(query);
+            request.input('Slug', sql.NVarChar(256), (slug || ''));
+            const promiseResult = await request.query(query);
+            const result = (promiseResult && promiseResult.recordset) ?promiseResult.recordset : [];
             return result;
 
         } catch (err) {
