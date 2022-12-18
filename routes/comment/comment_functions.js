@@ -96,6 +96,8 @@ const CommentFunctions = {
 */
     createItem: async (config, privateKeyID, user, data) => {
         privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
+        const fullName = data.CommentFullName && data.CommentFullName.length > 0 ?
+        data.CommentFullName  : user.FirstName + ' ' + user.LastName;
 
         try {
             await sql.connect(config);
@@ -107,7 +109,7 @@ const CommentFunctions = {
 
             request.input('CommentTitle', sql.NVarChar(384), data.CommentTitle || '');
             request.input('CommentDetail', sql.NVarChar(), data.CommentDetail);
-            request.input('CommentFullName', sql.NVarChar(128), (data.CommentFullName || ''));
+            request.input('CommentFullName', sql.NVarChar(128), fullName);
 
             request.input('SortOrder', sql.Int, (data.SortOrder || 0));
             request.input('ReplyLevel', sql.Int, (data.ReplyLevel || 0));
