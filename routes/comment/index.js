@@ -129,11 +129,7 @@ router.put("/:siteid/:id", async function (request, response) {
     CommentFactory.Set(request.body);
     const dataValues = CommentFactory.Get();
 
-    console.log({
-        authUser:authUser, dataValues:dataValues
-    })
-
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if ((authUser.ITCC_UserID === dataValues.ITCC_UserID) || (authUser.RoleNames.indexOf('admin') > -1)) {
 
         if (!dataValues.Slug || dataValues.Slug.trim().length === 0) {
             dataValues.Slug = SharedFunctions.slugify(dataValues.Name);

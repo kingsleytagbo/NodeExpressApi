@@ -178,7 +178,7 @@ const CommentFunctions = {
             query += ' SELECT @@ROWCOUNT;';
 
             const authResult = await request.query(query);
-            const result = data;
+            const result = (authResult && authResult.recordset) ? authResult.recordset : null;
 
             return result;
 
