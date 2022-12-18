@@ -100,37 +100,43 @@ const CommentFunctions = {
         try {
             await sql.connect(config);
             const request = new sql.Request();
-            request.input('Name', sql.NVarChar(125), data.Name);
-            request.input('Description', sql.NVarChar(), data.Description);
-            request.input('Slug', sql.NVarChar(256), (data.Slug || ''));
-            request.input('CommentType', sql.NVarChar(), (data.CommentType || ''));
-            request.input('PostDate', sql.DateTime2, data.PostDate);
+            request.input('ITCC_CommentID', sql.Int, data.ITCC_CommentID);
+
+            request.input('ITCC_PostID', sql.Int, data.ITCC_PostID);
+            request.input('ReplyPostID', sql.Int, data.ReplyPostID);
+
+            request.input('CommentTitle', sql.NVarChar(384), data.CommentTitle || '');
+            request.input('CommentDetail', sql.NVarChar(), data.CommentDetail);
+            request.input('CommentFullName', sql.NVarChar(128), (data.CommentFullName || ''));
+
             request.input('SortOrder', sql.Int, (data.SortOrder || 0));
-            request.input('Category', sql.NVarChar(), (data.Category || ''));
-            request.input('Tags', sql.NVarChar(), (data.Tags || ''));
-            request.input('PostSummary', sql.NVarChar(), (data.PostSummary || {}));
+            request.input('ReplyLevel', sql.Int, (data.ReplyLevel || 0));
+
+            request.input('CreateAccountID', sql.NVarChar(), data.CreateAccountID);
+            request.input('ModifyAccountID', sql.NVarChar(), data.ModifyAccountID);
+
+            request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
             request.input('SiteID', sql.Int, data.ITCC_WebsiteID);
             request.input('ITCC_StatusID', sql.Int, 2);
             request.input('CreateDate', sql.DateTime, data.CreateDate);
             request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-            request.input('ModifyUserID', sql.Int, data.ModifyUserID);
-            request.input('RoleName', sql.NVarChar(), data.RoleName);
-            request.input('Author', sql.NVarChar(256), user.FirstName + ' ' + user.LastName);
-            request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+
 
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
-            query += ' INSERT INTO ITCC_Comment (Name, Description, Slug, CommentType, Permalink, PostDate, Category, Tags, PostSummary, ';
-            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, ModifyUserID, RoleName, SortOrder, Author )';
-            query += '  VALUES (@Name, @Description, @Slug, @CommentType, NEWID(), @PostDate, @Category, @Tags, @PostSummary, ';
-            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ModifyUserID, @RoleName, @SortOrder, @Author )';
+            query += ' INSERT INTO ITCC_Comment (CommentTitle, CommentDetail, CommentFullName, ITCC_StatusID, ReplyLevel, ReplyPostID, SortOrder,';
+            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID )';
+            query += '  VALUES (@CommentTitle, @CommentDetail, @CommentFullName, @ITCC_StatusID, @ReplyLevel, @ReplyPostID, @SortOrder, ';
+            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @CreateAccountID, @ModifyAccountID )';
 
             query += ' COMMIT TRANSACTION;';
             query += ' SELECT SCOPE_IDENTITY() NEWID;';
 
+            console.log({query: query})
+
             const authResult = await request.query(query);
-            const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+            const result = (authResult && authResult.recordset) ? authResult.recordset : null;
 
             return result;
 

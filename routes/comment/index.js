@@ -106,8 +106,7 @@ router.post("/:siteid", async function (request, response) {
             dataValues.Slug = SharedFunctions.slugify(dataValues.Name);
         }
 
-        const authResult = await comments.createItem(config, siteid, authUser, dataValues);
-        const result = authResult;
+        const result = await comments.createItem(config, siteid, authUser, dataValues);
         return response.send(result);
     }
     else {
