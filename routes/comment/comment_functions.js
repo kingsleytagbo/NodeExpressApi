@@ -126,14 +126,12 @@ const CommentFunctions = {
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
             query += ' INSERT INTO ITCC_Comment (ITCC_PostID, CommentTitle, CommentDetail, CommentFullName, ReplyLevel, ReplyPostID, SortOrder,';
-            query += ' @ITCC_PostID, ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID )';
-            query += '  VALUES (@CommentTitle, @CommentDetail, @CommentFullName, @ReplyLevel, @ReplyPostID, @SortOrder, ';
+            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID )';
+            query += '  VALUES ( @ITCC_PostID, @CommentTitle, @CommentDetail, @CommentFullName, @ReplyLevel, @ReplyPostID, @SortOrder, ';
             query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @CreateAccountID, @ModifyAccountID )';
 
             query += ' COMMIT TRANSACTION;';
             query += ' SELECT SCOPE_IDENTITY() NEWID;';
-
-            console.log({query: query})
 
             const authResult = await request.query(query);
             const result = (authResult && authResult.recordset) ? authResult.recordset : null;
