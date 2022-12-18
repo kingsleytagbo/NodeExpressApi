@@ -127,7 +127,7 @@ const CommentFunctions = {
             query += ' BEGIN TRAN; ';
             query += ' INSERT INTO ITCC_Comment (CommentTitle, CommentDetail, CommentFullName, ReplyLevel, ReplyPostID, SortOrder,';
             query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID )';
-            query += '  VALUES (@CommentTitle, @CommentDetail, @CommentFullName, @ITCC_StatusID, @ReplyLevel, @ReplyPostID, @SortOrder, ';
+            query += '  VALUES (@CommentTitle, @CommentDetail, @CommentFullName, @ReplyLevel, @ReplyPostID, @SortOrder, ';
             query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @CreateAccountID, @ModifyAccountID )';
 
             query += ' COMMIT TRANSACTION;';
