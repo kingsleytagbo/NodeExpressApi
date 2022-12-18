@@ -67,7 +67,7 @@ router.get("/:siteid/:id", async function (request, response) {
     }
 });
 
-// get one comment by slug
+// get all comments by blog slug
 router.get("/:siteid/slug/:id", async function (request, response) {
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
@@ -76,7 +76,7 @@ router.get("/:siteid/slug/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const authResult = await comments.getItemBySlug(config, siteid, id);
+    const authResult = await comments.getItemsBySlug(config, siteid, id);
     const result = (authResult.recordset && (authResult.recordset.length > 0))
         ? authResult.recordset[0] : null;
 
