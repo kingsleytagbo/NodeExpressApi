@@ -124,11 +124,16 @@ router.put("/:siteid/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
+
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    CommentFactory.Set(request.body);
+    const dataValues = CommentFactory.Get();
+
+    console.log({
+        authUser:authUser, dataValues:dataValues
+    })
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
-        CommentFactory.Set(request.body);
-        const dataValues = CommentFactory.Get();
 
         if (!dataValues.Slug || dataValues.Slug.trim().length === 0) {
             dataValues.Slug = SharedFunctions.slugify(dataValues.Name);

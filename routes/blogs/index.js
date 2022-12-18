@@ -77,16 +77,21 @@ router.get("/:siteid/slug/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    
     const blogResult = await blogs.getItemBySlug(config, siteid, id);
-    const commentResult = await comments.getItemsBySlug(config, siteid, id);
-    const result = Object.assign(blogResult, {Comments: commentResult});
 
-    if (roleNames && roleNames.indexOf('admin') > -1) {
-        return response.send(result);
+    if (blogResult) {
+        const commentResult = await comments.getItemsBySlug(config, siteid, blogResult.ITCC_BlogID);
+        const result = Object.assign(blogResult, { Comments: commentResult });
+
+        if (roleNames && roleNames.indexOf('admin') > -1) {
+            return response.send(result);
+        }
+        else {
+            return response.send(result);
+        }
     }
-    else {
-        return response.send(result);
+    else{
+        return response.send(null);
     }
 });
 
