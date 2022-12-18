@@ -70,12 +70,17 @@ const CommentFunctions = {
             query += ' JOIN [ITCC_Blog] BG (NOLOCK) ON (US.ITCC_PostID = BG.ITCC_BlogID) ';
             query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (US.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
             query += ' WHERE ( ' +
+            ' ( BG.ITCC_BlogID = @BlogID ) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
+            ') ';
+            /*
+            query += ' WHERE ( ' +
                 ' ( LOWER(TRIM(BG.Slug)) = LOWER(TRIM(@Slug)) ) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
                 ') ';
+            */
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('Slug', sql.NVarChar(256), (slug || ''));
+            request.input('BlogID', sql.Int, slug);
             const promiseResult = await request.query(query);
             const result = (promiseResult && promiseResult.recordset) ? promiseResult.recordset : [];
             return result;
