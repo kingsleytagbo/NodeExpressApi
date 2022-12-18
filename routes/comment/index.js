@@ -137,10 +137,6 @@ router.put("/:siteid/:id", async function (request, response) {
 
         const result = await comments.updateItem(config, siteid, authUser, dataValues);
 
-        console.log({
-            UpdateComment: result
-        })
-
         return response.send(result);
     }
     else {
