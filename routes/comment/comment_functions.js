@@ -71,7 +71,7 @@ const CommentFunctions = {
             query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (US.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
             query += ' WHERE ( ' +
             ' ( BG.ITCC_BlogID = @BlogID ) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
-            ') ';
+            ') ORDER BY US.ModifDate DESC';
             /*
             query += ' WHERE ( ' +
                 ' ( LOWER(TRIM(BG.Slug)) = LOWER(TRIM(@Slug)) ) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
