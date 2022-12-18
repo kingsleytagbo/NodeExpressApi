@@ -125,7 +125,7 @@ const CommentFunctions = {
 
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
-            query += ' INSERT INTO ITCC_Comment (CommentTitle, CommentDetail, CommentFullName, ITCC_StatusID, ReplyLevel, ReplyPostID, SortOrder,';
+            query += ' INSERT INTO ITCC_Comment (CommentTitle, CommentDetail, CommentFullName, ReplyLevel, ReplyPostID, SortOrder,';
             query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID )';
             query += '  VALUES (@CommentTitle, @CommentDetail, @CommentFullName, @ITCC_StatusID, @ReplyLevel, @ReplyPostID, @SortOrder, ';
             query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @CreateAccountID, @ModifyAccountID )';
