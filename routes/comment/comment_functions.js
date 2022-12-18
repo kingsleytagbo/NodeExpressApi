@@ -77,7 +77,7 @@ const CommentFunctions = {
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('Slug', sql.NVarChar(256), (slug || ''));
             const promiseResult = await request.query(query);
-            const result = (promiseResult && promiseResult.recordset) ?promiseResult.recordset : [];
+            const result = (promiseResult && promiseResult.recordset) ? promiseResult.recordset : [];
             return result;
 
         } catch (err) {

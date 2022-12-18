@@ -75,10 +75,9 @@ router.get("/:siteid/slug/:id", async function (request, response) {
     const id = request.params.id;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
+
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const authResult = await comments.getItemsBySlug(config, siteid, id);
-    const result = (authResult.recordset && (authResult.recordset.length > 0))
-        ? authResult.recordset[0] : null;
+    const result = await comments.getItemsBySlug(config, siteid, id);
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         return response.send(result);
