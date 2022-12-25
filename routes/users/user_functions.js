@@ -36,6 +36,8 @@ const UserFunctions = {
                 query += ' OFFSET @Offset ROWS ';
                 query += ' FETCH NEXT @PageSize ROWS ONLY ';
 
+                //console.log({authUser: authUser, query: query})
+
                 const request = new sql.Request();
                 request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
                 request.input('Offset', sql.Int, offset);

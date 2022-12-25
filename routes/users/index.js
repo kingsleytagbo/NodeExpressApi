@@ -24,6 +24,7 @@ const UserFactory = {
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
 router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response) {
+
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
