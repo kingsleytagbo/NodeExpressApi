@@ -50,6 +50,10 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
 
 // get one user
 router.get("/:siteid/:id", async function (request, response) {
+    //admin gets any users
+    // authenticated users get only their record
+    // un-authenticated users get nothing
+
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -70,12 +74,13 @@ router.get("/:siteid/:id", async function (request, response) {
 
 // create a new user along with some basic roles needed to access the system
 router.post("/:siteid", async function (request, response) {
+    //admin only can create a new user
+
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
@@ -93,6 +98,8 @@ router.post("/:siteid", async function (request, response) {
 
 // delete a user
 router.delete("/:siteid/:id", async function (request, response) {
+    // admin only can delete a user
+    // admin cannot delete their own user 
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -102,7 +109,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
-        const authResult = await users.deleteUser(config, siteid, id);
+        await users.deleteUser(config, siteid, id);
         return response.send(id);
     }
     else {
@@ -112,6 +119,10 @@ router.delete("/:siteid/:id", async function (request, response) {
 
 // update a user
 router.put("/:siteid/:id", async function (request, response) {
+    // admin can update any users
+    // authenticated users can update only their own record
+    // un-authenticated users can update nothing
+
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -120,10 +131,15 @@ router.put("/:siteid/:id", async function (request, response) {
     const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-    const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
+    const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (roleNames.indexOf('admin') > -1) {
-        const result = await users.updateUser(config, siteid, id, username, emailaddress);
+    UserFactory.Set(request.body);
+    const dataValues = UserFactory.Get();
+
+    console.log({dataValues: dataValues})
+
+    if ((authUser.RoleNames.indexOf('admin') > -1) || (dataValues.ITCC_UserID === authUser.ITCC_UserID)) {
+        const result = await users.updateUser(config, siteid, id, authUser, dataValues);
         return response.send(result);
     }
     else {

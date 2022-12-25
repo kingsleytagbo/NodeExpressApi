@@ -86,7 +86,7 @@ const UserFunctions = {
                 const authResult = await request.query(query);
                 const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ?
                     authResult.recordset[0] : null;
-
+                console.log({getUser: result})
                 return result;
 
             } catch (err) {
@@ -101,21 +101,27 @@ const UserFunctions = {
     /*
         Updates a singLe user's information on SQL Server
     */
-    updateUser: async (config, privateKeyID, id, username, emailaddress) => {
+    updateUser: async (config, privateKeyID, id, authUser, data) => {
         privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
 
         try {
             await sql.connect(config);
             let query = ' UPDATE ITCC_USER SET ';
-            query += ' Username = @Username, EmailAddress = @EmailAddress ';
+            query += ' UserName = @UserName, EmailAddress = @EmailAddress, ';
+            query += ' FirstName = @FirstName, LastName = @LastName, ';
+            query += ' ModifyUserID = @ITCC_UserID, ModifyDate = GetDate() ';
             query += ' WHERE ( ' +
                 ' ( ITCC_USERID = @ID ) ' +
                 '); SELECT @@ROWCOUNT; ';
 
             const request = new sql.Request();
             request.input('ID', sql.Int, id);
-            request.input('Username', sql.NVarChar(64), username);
-            request.input('EmailAddress', sql.NVarChar(64), emailaddress);
+            request.input('UserName', sql.NVarChar(64), data.UserName);
+            request.input('EmailAddress', sql.NVarChar(64), data.EmailAddress);
+            request.input('Password', sql.NVarChar(64), data.Password);
+            request.input('FirstName', sql.NVarChar(64), data.FirstName);
+            request.input('LastName', sql.NVarChar(128), data.LastName);
+            request.input('ITCC_UserID', sql.Int, authUser.ITCC_UserID);
 
             const authResult = await request.query(query);
             const result = (authResult && authResult.recordset) ? authResult.recordset : [];
