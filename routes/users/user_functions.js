@@ -87,7 +87,6 @@ const UserFunctions = {
                 const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ?
                     authResult.recordset[0] : null;
 
-                    co
                 return result;
 
             } catch (err) {
