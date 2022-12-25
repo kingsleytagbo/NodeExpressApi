@@ -126,9 +126,6 @@ router.put("/:siteid/:id", async function (request, response) {
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
-    const id = request.body.id;
-    const username = request.body.username;
-    const emailaddress = request.body.emailaddress;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
@@ -136,10 +133,8 @@ router.put("/:siteid/:id", async function (request, response) {
     UserFactory.Set(request.body);
     const dataValues = UserFactory.Get();
 
-    console.log({dataValues: dataValues})
-
     if ((authUser.RoleNames.indexOf('admin') > -1) || (dataValues.ITCC_UserID === authUser.ITCC_UserID)) {
-        const result = await users.updateUser(config, siteid, id, authUser, dataValues);
+        const result = await users.updateUser(config, siteid, authUser, dataValues);
         return response.send(result);
     }
     else {

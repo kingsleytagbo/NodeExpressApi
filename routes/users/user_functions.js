@@ -101,7 +101,7 @@ const UserFunctions = {
     /*
         Updates a singLe user's information on SQL Server
     */
-    updateUser: async (config, privateKeyID, id, authUser, data) => {
+    updateUser: async (config, privateKeyID, authUser, data) => {
         privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
 
         try {
@@ -115,7 +115,7 @@ const UserFunctions = {
                 '); SELECT @@ROWCOUNT; ';
 
             const request = new sql.Request();
-            request.input('ID', sql.Int, id);
+            request.input('ID', sql.Int, data.ITCC_UserID);
             request.input('UserName', sql.NVarChar(64), data.UserName);
             request.input('EmailAddress', sql.NVarChar(64), data.EmailAddress);
             request.input('Password', sql.NVarChar(64), data.Password);
