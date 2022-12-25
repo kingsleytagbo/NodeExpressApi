@@ -24,6 +24,9 @@ const UserFactory = {
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
 router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response) {
+    //admin gets all users
+    // authenticated users get only their record
+    // un-authenticated users get nothing
 
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
@@ -35,12 +38,13 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    //admin gets all users
-    // authenticated users get only their record
-    // un-authenticated users get nothing
-    const result = await users.getUsers(config, authUser, siteid, offset, pageSize);
-    return response.status(200).send(result);
-
+    if (authUser) {
+        const result = await users.getUsers(config, authUser, siteid, offset, pageSize);
+        return response.status(200).send(result);
+    }
+    else {
+        return response.status(401).send({ error: 'you\'re not authorized to access this' });
+    }
 
 });
 
@@ -54,15 +58,14 @@ router.get("/:siteid/:id", async function (request, response) {
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
-        const authResult = await users.getUser(config, siteid, id);
-        const result = (authResult.recordset && (authResult.recordset.length > 0))
-            ? authResult.recordset[0] : null;
+    if (authUser) {
+        const result = await users.getUser(config, authUser, siteid, id);
         return response.send(result);
     }
     else {
         return response.status(401).send({ error: 'you\'re not authorized to access this' });
     }
+
 });
 
 // create a new user along with some basic roles needed to access the system

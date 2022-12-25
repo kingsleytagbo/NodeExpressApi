@@ -45,12 +45,12 @@ const UserFunctions = {
                 request.input('PageSize', sql.Int, pageSize);
 
                 const authResult = await request.query(query);
-                const result = (authResult && authResult.recordset) ? authResult.recordset :[];
+                const result = (authResult && authResult.recordset) ? authResult.recordset : [];
 
                 return result;
 
             } catch (err) {
-                console.log({getUsers_Error: err});
+                console.log({ getUsers_Error: err });
                 return [];
             }
         }
@@ -62,32 +62,41 @@ const UserFunctions = {
     /*
         SELECTS a singLe user & associated roles from SQL Server
     */
-    getUser: async (config, privateKeyID, id) => {
+    getUser: async (config, authUser, privateKeyID, id) => {
+        let result;
 
-        try {
-            await sql.connect(config);
-            let query = ' SELECT US.*';
-            query += ' FROM [ITCC_User] US (NOLOCK) JOIN [ITCC_WebsiteUser] WU (NOLOCK) ';
-            query += ' ON (US.ITCC_UserID = WU.ITCC_UserID) ';
-            query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
-            query += ' WHERE ( ' +
+        if (authUser) {
+            // you can only get your own user record unless you are admin
+            id =  (authUser.RoleNames.indexOf('admin') > -1) ? id : authUser.ITCC_UserID;
+
+            try {
+                await sql.connect(config);
+                let query = ' SELECT US.*';
+                query += ' FROM [ITCC_User] US (NOLOCK) JOIN [ITCC_WebsiteUser] WU (NOLOCK) ';
+                query += ' ON (US.ITCC_UserID = WU.ITCC_UserID) ';
+                query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
+                query += ' WHERE ( ' +
                 ' (US.ITCC_USERID = @ID) AND (WS.PrivateKeyID = @PrivateKeyID) ' +
                 ') ';
 
-            const request = new sql.Request();
-            request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('ID', sql.Int, id);
+                const request = new sql.Request();
+                request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
+                request.input('ID', sql.Int, id);
 
-            const authResult = await request.query(query);
-            const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? 
-            authResult.recordset[0] :null;
+                const authResult = await request.query(query);
+                const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ?
+                    authResult.recordset[0] : null;
 
+                    co
+                return result;
 
-            return result;
+            } catch (err) {
+                console.log({ getUser_Error: err });
+            }
 
-        } catch (err) {
-            throw err
         }
+
+        return result;
     },
 
     /*
@@ -110,7 +119,7 @@ const UserFunctions = {
             request.input('EmailAddress', sql.NVarChar(64), emailaddress);
 
             const authResult = await request.query(query);
-            const result = (authResult && authResult.recordset) ? authResult.recordset :[];
+            const result = (authResult && authResult.recordset) ? authResult.recordset : [];
             return result;
 
         } catch (err) {
@@ -163,9 +172,9 @@ const UserFunctions = {
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ID', sql.Int, id);
-            
+
             const authResult = await request.query(query);
-            const result = (authResult && authResult.recordset) ? authResult.recordset :[];
+            const result = (authResult && authResult.recordset) ? authResult.recordset : [];
             return result;
 
         } catch (err) {
