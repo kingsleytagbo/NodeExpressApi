@@ -108,7 +108,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1 && authUser.ITCC_UserID !== Number(id) ) {
         await users.deleteUser(config, siteid, id);
         return response.send(id);
     }
