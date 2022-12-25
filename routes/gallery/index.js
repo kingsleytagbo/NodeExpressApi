@@ -37,7 +37,6 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
     const offset = (pageNum - 1) * pageSize;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
-
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
     if (authUser && authUser.RoleNames.indexOf('admin') > -1) {
@@ -62,11 +61,13 @@ router.get("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    const authResult = await gallery.getItem(config, siteid, id);
+    const result = (authResult.recordset && (authResult.recordset.length > 0))
+        ? authResult.recordset[0] : null;
+        
+    console.log({authUser: authUser, result: result})
 
     if (authUser.RoleNames.indexOf('admin') > -1) {
-        const authResult = await gallery.getItem(config, siteid, id);
-        const result = (authResult.recordset && (authResult.recordset.length > 0))
-            ? authResult.recordset[0] : null;
         return response.send(result);
     }
     else {
@@ -176,6 +177,8 @@ router.put("/:siteid/:id", async function (request, response) {
                 const originalFilename = file.originalFilename;
                 const mimetype = file.mimetype;
                 const size = file.size;
+
+                console.log({authUser: authUser, fields: fields})
 
                 GalleryFactory.Set(fields);
                 const dataValues = GalleryFactory.Get();
