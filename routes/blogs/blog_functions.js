@@ -105,7 +105,7 @@ const BlogFunctions = {
             request.input('PostSummary', sql.NVarChar(), (data.PostSummary || {}));
             request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
             request.input('SiteID', sql.Int, data.ITCC_WebsiteID);
-            request.input('ITCC_StatusID', sql.Int, 2);
+            request.input('ITCC_StatusID', sql.Int, 1);
             request.input('CreateDate', sql.DateTime, data.CreateDate);
             request.input('ModifyDate', sql.DateTime, data.ModifyDate);
             request.input('RoleName', sql.NVarChar(), data.RoleName);
