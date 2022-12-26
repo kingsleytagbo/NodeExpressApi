@@ -75,6 +75,8 @@ router.get("/:siteid/:id", async function (request, response) {
 
 // create a new gallery along with some basic roles needed to access the system
 router.post("/:siteid", async function (request, response) {
+    // Authenticated users only can post 
+
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -88,7 +90,7 @@ router.post("/:siteid", async function (request, response) {
         fs.mkdirSync(uploadDir);
     }
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser && authUser.RoleNames && authUser.RoleNames.length > 0)  {
         const form = new formidable.IncomingForm({
             uploadDir: uploadDir,
             keepExtensions: true,
@@ -120,12 +122,12 @@ router.post("/:siteid", async function (request, response) {
                 dataValues.Tags = dataValues.Tags ? dataValues.Tags += newTags : newTags;
 
                 dataValues.CreateAccountID = authUser.ITCC_UserID;
-                dataValues.CreateUserID = authUser.ITCC_UserID;
                 dataValues.ModifyAccountID = authUser.ITCC_UserID;
+                dataValues.CreateUserID = authUser.ITCC_UserID;
                 dataValues.UpdateUserID = authUser.ITCC_UserID;
 
                 const authResult = gallery.createItem(config, siteid, authUser, dataValues);
-                authResult.then((result) => {
+                authResult.finally((result) => {
                     return response.send(result);
                 });
             }
@@ -154,7 +156,7 @@ router.put("/:siteid/:id", async function (request, response) {
         fs.mkdirSync(uploadDir);
     }
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.length > 0) {
         const form = new formidable.IncomingForm({
             uploadDir: uploadDir,
             keepExtensions: true,
@@ -174,8 +176,6 @@ router.put("/:siteid/:id", async function (request, response) {
                 const mimetype = file.mimetype;
                 const size = file.size;
 
-                console.log({authUser: authUser, fields: fields})
-
                 GalleryFactory.Set(fields);
                 const dataValues = GalleryFactory.Get();
                 dataValues.IsActive = 1;
@@ -192,10 +192,15 @@ router.put("/:siteid/:id", async function (request, response) {
                 dataValues.ModifyAccountID = authUser.ITCC_UserID;
                 dataValues.UpdateUserID = authUser.ITCC_UserID;
 
-                const authResult = gallery.updateItem(config, siteid, authUser, dataValues);
-                authResult.then((result) => {
-                    return response.send(result);
-                });
+                console.log({authUser: authUser, dataValues: dataValues})
+                if ( (authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === dataValues.CreateAccountID) ) 
+                {
+                    const authResult = gallery.updateItem(config, siteid, authUser, dataValues);
+                    authResult.then((result) => {
+                        return response.send(result);
+                    });
+                }
+
             }
 
         });

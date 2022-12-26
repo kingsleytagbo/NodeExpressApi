@@ -86,6 +86,7 @@ const GalleryFunctions = {
                 request.input('PublishUrl', sql.NVarChar(383), (data.PublishUrl || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
                 request.input('IsActive', sql.Bit, 1);
+
                 request.input('CreateDate', sql.DateTime, data.CreateDate);
                 request.input('ModifyDate', sql.DateTime, data.ModifyDate);
                 request.input('UpdateDate', sql.DateTime, data.ModifyDate);
@@ -110,10 +111,11 @@ const GalleryFunctions = {
     
                 return result;
     
-            } catch (err) {
-                throw err
-            }
-        },
+        } catch (err) {
+            console.log({PostGallery_Error: err});
+            return null
+        }
+    },
 
     /*
         Updates a singLe Image's information on SQL Server
@@ -151,12 +153,13 @@ const GalleryFunctions = {
                 query += ' SELECT @@ROWCOUNT;';
         
                 const authResult = await request.query(query);
-                const result = data;
+                const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
     
                 return result;
     
             } catch (err) {
-                throw err
+                console.log({PutGallery_Error: err});
+                return null
             }
         },
 
