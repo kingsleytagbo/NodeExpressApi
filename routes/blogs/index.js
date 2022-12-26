@@ -90,13 +90,14 @@ router.get("/:siteid/slug/:id", async function (request, response) {
             return response.send(result);
         }
     }
-    else{
+    else {
         return response.send(null);
     }
 });
 
 // create a new Item along with some basic roles needed to access the system
 router.post("/:siteid", async function (request, response) {
+    // Authenticated users only can post 
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -106,7 +107,7 @@ router.post("/:siteid", async function (request, response) {
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
     //console.log({authUser: authUser});
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser && authUser.RoleNames && authUser.RoleNames.length > 0) {
         BlogFactory.Set(request.body);
         const dataValues = BlogFactory.Get();
 
@@ -151,8 +152,11 @@ router.put("/:siteid/:id", async function (request, response) {
     }
 });
 
-// delete a Item
+// delete an Item
 router.delete("/:siteid/:id", async function (request, response) {
+    // admin can delete any blog
+    // Authenticated users cann only delete their own post
+    // Unauthenticated users cannot delete any thing
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);

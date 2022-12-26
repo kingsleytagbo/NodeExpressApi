@@ -108,7 +108,6 @@ const BlogFunctions = {
             request.input('ITCC_StatusID', sql.Int, 2);
             request.input('CreateDate', sql.DateTime, data.CreateDate);
             request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-            request.input('ModifyUserID', sql.Int, data.ModifyUserID);
             request.input('RoleName', sql.NVarChar(), data.RoleName);
             request.input('Author', sql.NVarChar(256), user.FirstName + ' ' + user.LastName);
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
@@ -116,9 +115,9 @@ const BlogFunctions = {
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
             query += ' INSERT INTO ITCC_BLOG (Name, Description, Slug, BlogType, Permalink, PostDate, Category, Tags, PostSummary, ';
-            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, ModifyUserID, RoleName, SortOrder, Author )';
+            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateUserID, ModifyUserID, RoleName, SortOrder, Author )';
             query += '  VALUES (@Name, @Description, @Slug, @BlogType, NEWID(), @PostDate, @Category, @Tags, @PostSummary, ';
-            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ModifyUserID, @RoleName, @SortOrder, @Author )';
+            query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ITCC_UserID, @ITCC_UserID, @RoleName, @SortOrder, @Author )';
 
             query += ' COMMIT TRANSACTION;';
             query += ' SELECT SCOPE_IDENTITY() NEWID;';
@@ -129,7 +128,8 @@ const BlogFunctions = {
             return result;
 
         } catch (err) {
-            throw err
+            console.log({CreateBlog_Error: err});
+            return null;
         }
     },
 
