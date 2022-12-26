@@ -34,7 +34,7 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
     const pageNum = (request.params.pagenum) ? request.params.pagenum : 1;
-    const pageSize = (request.params.pagesize) ? request.params.pagesize : 10; 
+    const pageSize = (request.params.pagesize) ? request.params.pagesize : 10;
     const offset = (pageNum - 1) * pageSize;
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
@@ -84,13 +84,13 @@ router.post("/:siteid", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
-   
-    const uploadDir =  path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
+
+    const uploadDir = path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir);
     }
 
-    if (authUser && authUser.RoleNames && authUser.RoleNames.length > 0)  {
+    if (authUser && authUser.RoleNames && authUser.RoleNames.length > 0) {
         const form = new formidable.IncomingForm({
             uploadDir: uploadDir,
             keepExtensions: true,
@@ -150,8 +150,8 @@ router.put("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
-    
-    const uploadDir =  path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
+
+    const uploadDir = path.join(config.fileUploadDirectory, siteid) || path.join(__dirname, "public", "files", siteid);
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir);
     }
@@ -169,36 +169,46 @@ router.put("/:siteid/:id", async function (request, response) {
                 });
             }
             else {
-                const file = files.file;
-                const filepath = file.filepath;
-                const newFilename = file.newFilename;
-                const originalFilename = file.originalFilename;
-                const mimetype = file.mimetype;
-                const size = file.size;
 
-                GalleryFactory.Set(fields);
-                const dataValues = GalleryFactory.Get();
-                dataValues.IsActive = 1;
-                dataValues.Slug = newFilename;
-                dataValues.FilePath = filepath;
-                dataValues.PublishUrl = '/' + newFilename;
-                dataValues.Title = originalFilename || newFilename;
+                try {
+                    GalleryFactory.Set(fields);
+                    const dataValues = GalleryFactory.Get();
+                    dataValues.IsActive = 1;
 
-                const newTags = (size + ', ' + mimetype);
-                dataValues.Tags = dataValues.Tags ? dataValues.Tags += newTags : newTags;
+                    if (files && files.file) {
+                        const file = files?.file;
+                        const filepath = file?.filepath;
+                        const newFilename = file?.newFilename;
+                        const originalFilename = file?.originalFilename;
+                        const mimetype = file?.mimetype;
+                        const size = file?.size;
 
-                dataValues.CreateAccountID = authUser.ITCC_UserID;
-                dataValues.CreateUserID = authUser.ITCC_UserID;
-                dataValues.ModifyAccountID = authUser.ITCC_UserID;
-                dataValues.UpdateUserID = authUser.ITCC_UserID;
+                        dataValues.Slug = newFilename;
+                        dataValues.FilePath = filepath;
+                        dataValues.PublishUrl = '/' + newFilename;
+                        dataValues.Title = originalFilename || newFilename;
 
-                console.log({authUser: authUser, dataValues: dataValues})
-                if ( (authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === dataValues.CreateAccountID) ) 
-                {
-                    const authResult = gallery.updateItem(config, siteid, authUser, dataValues);
-                    authResult.then((result) => {
-                        return response.send(result);
-                    });
+                        const newTags = (size + ', ' + mimetype);
+                        dataValues.Tags = dataValues.Tags ? dataValues.Tags += newTags : newTags;
+                    }
+
+
+                    dataValues.CreateAccountID = authUser.ITCC_UserID;
+                    dataValues.CreateUserID = authUser.ITCC_UserID;
+                    dataValues.ModifyAccountID = authUser.ITCC_UserID;
+                    dataValues.UpdateUserID = authUser.ITCC_UserID;
+
+                    if ((authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === dataValues.CreateAccountID)) {
+                        const authResult = gallery.updateItem(config, siteid, authUser, dataValues);
+                        authResult.then((result) => {
+                            return response.send(result);
+                        });
+                    }
+
+                }
+                catch (err) {
+                    console.log({ PutGallery_Error1: err });
+                    return response.send({ err: '2' });
                 }
 
             }
@@ -227,7 +237,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
     const galleryItem = await gallery.getItem(config, siteid, id);
 
-    if ( (authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === galleryItem.CreateAccountID) ) {
+    if ((authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === galleryItem.CreateAccountID)) {
         await gallery.deleteItem(config, siteid, id);
         return response.send(id);
     }

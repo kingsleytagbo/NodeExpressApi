@@ -139,9 +139,8 @@ const GalleryFunctions = {
                 request.input('PublishUrl', sql.NVarChar(383), (data.PublishUrl || ''));
                 request.input('SiteID', sql.VarChar(), data.ITCC_WebsiteID);
                 request.input('IsActive', sql.Bit, 1);
-                request.input('ModifyAccountID', sql.VarChar(), user.ITCC_UserID);
-                request.input('UpdateUserID', sql.VarChar(), user.ITCC_UserID);
-                request.input('CreateAccountID', sql.VarChar(), user.ITCC_UserID);
+                request.input('ModifyAccountID', sql.Int, user.ITCC_UserID);
+                request.input('UpdateUserID', sql.Int, user.ITCC_UserID);
     
                 let query = ' ';
                 query += ' BEGIN TRAN; ';
