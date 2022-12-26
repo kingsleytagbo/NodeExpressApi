@@ -160,23 +160,23 @@ const BlogFunctions = {
             request.input('ITCC_BlogID', sql.Int, data.ITCC_BlogID);
             request.input('ITCC_UserID', sql.Int, user.ITCC_UserID);
             request.input('SiteID', sql.NVarChar(), data.ITCC_WebsiteID);
-            request.input('ITCC_StatusID', sql.NVarChar(), 2);
+            request.input('ITCC_StatusID', sql.Int, data.ITCC_StatusID );
             request.input('CreateDate', sql.DateTime, data.CreateDate);
             request.input('ModifyDate', sql.DateTime, data.ModifyDate);
-            request.input('ModifyUserID', sql.NVarChar(), data.ModifyUserID);
+            request.input('ModifyAccountID', sql.Int, user.ITCC_UserID);
             request.input('RoleName', sql.NVarChar(), data.RoleName);
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
 
             let query = ' ';
             query += ' BEGIN TRAN; ';
-            query += ' UPDATE ITCC_BLOG SET Name=@Name, Description=@Description, Slug=@Slug, BlogType=@BlogType, ';
-            query += ' PostDate = @PostDate, Category=@Category, Tags=@Tags, ITCC_StatusID=@ITCC_StatusID, ModifyDate = @ModifyDate, SortOrder = @SortOrder ';
+            query += ' UPDATE ITCC_BLOG SET Name=@Name, Description=@Description, Slug=@Slug, BlogType=@BlogType, PostDate = @PostDate, ';
+            query += ' Category=@Category, Tags=@Tags, ITCC_StatusID=@ITCC_StatusID, ModifyAccountID=@ModifyAccountID, ModifyDate = GetDate(), SortOrder = @SortOrder ';
             query += ' WHERE ITCC_BlogID = @ITCC_BlogID; ';
             query += ' COMMIT TRANSACTION;';
             query += ' SELECT @@ROWCOUNT;';
 
             const authResult = await request.query(query);
-            const result = data;
+            const result = (authResult && authResult.recordset) ? authResult.recordset : [];
 
             return result;
 

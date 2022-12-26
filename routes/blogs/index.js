@@ -133,16 +133,15 @@ router.put("/:siteid/:id", async function (request, response) {
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
-        BlogFactory.Set(request.body);
-        const dataValues = BlogFactory.Get();
+    BlogFactory.Set(request.body);
+    const dataValues = BlogFactory.Get();
 
-        if (!dataValues.Slug || dataValues.Slug.trim().length === 0) {
-            dataValues.Slug = SharedFunctions.slugify(dataValues.Name);
-        }
+    if (!dataValues.Slug || dataValues.Slug.trim().length === 0) {
+        dataValues.Slug = SharedFunctions.slugify(dataValues.Name);
+    }
 
-        const authResult = await blogs.updateItem(config, siteid, authUser, dataValues);
-        const result = authResult.recordset;
+    if (authUser.RoleNames.indexOf('admin') > -1 || (authUser.ITCC_UserID === dataValues.CreateAccountID)) {
+        const result = await blogs.updateItem(config, siteid, authUser, dataValues);
         return response.send(result);
     }
     else {
@@ -164,7 +163,7 @@ router.delete("/:siteid/:id", async function (request, response) {
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
     const blogItem = await blogs.getItem(config, siteid, id);
 
-    if (authUser.RoleNames.indexOf('admin') > -1 || (authUser.ITCC_UserID === blogItem.ITCC_UserID) ) {
+    if (authUser.RoleNames.indexOf('admin') > -1 || (authUser.ITCC_UserID === blogItem.CreateAccountID) ) {
         await blogs.deleteItem(config, siteid, id);
         return response.send(id);
     }
