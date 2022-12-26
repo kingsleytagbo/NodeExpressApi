@@ -34,14 +34,13 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const itemsResult = await blogs.getItems(config, siteid, offset, pageSize);
-    const result = itemsResult.recordset;
+    const result = await blogs.getItems(config, siteid, offset, pageSize);
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         return response.status(200).send(result);
     }
     else {
-        // return a trimmed down result
+        // send a trimmed down list of fields for security
         return response.status(200).send(result);
     }
 
@@ -56,14 +55,13 @@ router.get("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const roleNames = await LoginFunctions.getUserRolesByAuthToken(config, siteid, authID);
-    const authResult = await blogs.getItem(config, siteid, id);
-    const result = (authResult.recordset && (authResult.recordset.length > 0))
-        ? authResult.recordset[0] : null;
+    const result = await blogs.getItem(config, siteid, id);
 
     if (roleNames && roleNames.indexOf('admin') > -1) {
         return response.send(result);
     }
     else {
+        // send a trimmed down list of fields for security
         return response.send(result);
     }
 });

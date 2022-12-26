@@ -23,12 +23,14 @@ const BlogFunctions = {
             request.input('Offset', sql.Int, offset);
             request.input('PageSize', sql.Int, pageSize);
 
-            const result = await request.query(query);
+            const authResult = await request.query(query);
+            const result = (authResult && authResult.recordset) ? authResult.recordset : [];
+
             return result;
 
         } catch (err) {
-            //console.log({getBlogs: err});
-            throw err
+            console.log({getBlogs_Error: err});
+            return [];
         }
     },
 
@@ -49,7 +51,11 @@ const BlogFunctions = {
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ID', sql.Int, id);
-            const result = await request.query(query);
+
+            const authResult = await request.query(query);
+            const result = (authResult.recordset && (authResult.recordset.length > 0))
+            ? authResult.recordset[0] : null;
+
             return result;
 
         } catch (err) {
@@ -115,7 +121,7 @@ const BlogFunctions = {
             let query = ' SELECT @SiteID = ITCC_WebsiteID FROM ITCC_WEBSITE (NOLOCK) WHERE (PrivateKeyID = @PrivateKeyID) ';
             query += ' BEGIN TRAN; ';
             query += ' INSERT INTO ITCC_BLOG (Name, Description, Slug, BlogType, Permalink, PostDate, Category, Tags, PostSummary, ';
-            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateUserID, ModifyUserID, RoleName, SortOrder, Author )';
+            query += ' ITCC_UserID, ITCC_WebsiteID, ITCC_StatusID, CreateDate, ModifyDate, CreateAccountID, ModifyAccountID, RoleName, SortOrder, Author )';
             query += '  VALUES (@Name, @Description, @Slug, @BlogType, NEWID(), @PostDate, @Category, @Tags, @PostSummary, ';
             query += ' @ITCC_UserID, @SiteID, @ITCC_StatusID, @CreateDate, @ModifyDate, @ITCC_UserID, @ITCC_UserID, @RoleName, @SortOrder, @Author )';
 
