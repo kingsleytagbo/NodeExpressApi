@@ -162,8 +162,9 @@ router.delete("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    const blogItem = await blogs.getItem(config, siteid, id);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser.RoleNames.indexOf('admin') > -1 || (authUser.ITCC_UserID === blogItem.ITCC_UserID) ) {
         await blogs.deleteItem(config, siteid, id);
         return response.send(id);
     }
