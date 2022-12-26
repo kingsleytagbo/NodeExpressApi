@@ -59,7 +59,8 @@ const BlogFunctions = {
             return result;
 
         } catch (err) {
-            throw err
+            console.log({getBlogs_Error: err});
+            return null
         }
     },
 
@@ -204,7 +205,8 @@ const BlogFunctions = {
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ID', sql.Int, id);
             const result = await request.query(query);
-            return result;
+
+            return result.recordset;
 
         } catch (err) {
             throw err

@@ -24,11 +24,14 @@ const GalleryFunctions = {
             request.input('Offset', sql.Int, offset);
             request.input('PageSize', sql.Int, pageSize);
 
-            const result = await request.query(query);
+            const authResult = await request.query(query);
+            const result = (authResult && authResult.recordset) ? authResult.recordset : [];
+
             return result;
 
         } catch (err) {
-            throw err
+            console.log({getAllGallerys_Error: err});
+            return [];
         }
     },
 
@@ -49,15 +52,20 @@ const GalleryFunctions = {
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ID', sql.Int, id);
-            const result = await request.query(query);
+
+            const authResult = await request.query(query);
+            const result = (authResult.recordset && (authResult.recordset.length > 0))
+            ? authResult.recordset[0] : null;
+
             return result;
 
         } catch (err) {
-            throw err
+            console.log({getOneGallery_Error: err});
+            return null
         }
     },
 
-        /*
+    /*
         Creates a singLe Image & associated roles in SQL Server
     */
         createItem: async (config, privateKeyID, user, data) => {
@@ -171,7 +179,8 @@ const GalleryFunctions = {
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
             request.input('ID', sql.Int, id);
             const result = await request.query(query);
-            return result;
+
+            return result.recordset;
 
         } catch (err) {
             throw err

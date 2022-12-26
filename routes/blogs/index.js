@@ -152,7 +152,7 @@ router.put("/:siteid/:id", async function (request, response) {
 // delete an Item
 router.delete("/:siteid/:id", async function (request, response) {
     // admin can delete any blog
-    // Authenticated users cann only delete their own post
+    // Authenticated users cnn only delete their own post
     // Unauthenticated users cannot delete any thing
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);

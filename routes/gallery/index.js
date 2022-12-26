@@ -29,6 +29,7 @@ const GalleryFactory = {
 //  https://nodeapi.launchfeatures.com/api/gallery/88B8B45E-2BE7-44CB-BBEA-547BB9A8C7D5/2
 // get a paginated list of users
 router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response) {
+    // Authenticated users only all items
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -39,9 +40,8 @@ router.get("/:siteid/page/:pagenum/:pagesize", async function (request, response
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
 
-    if (authUser && authUser.RoleNames.indexOf('admin') > -1) {
-        const itemsResult = await gallery.getItems(config, siteid, offset, pageSize);
-        const result = itemsResult.recordset;
+    if (authUser && authUser.RoleNames.length > 0) {
+        const result = await gallery.getItems(config, siteid, offset, pageSize);
         return response.status(200).send(result);
     }
     else {
@@ -61,18 +61,14 @@ router.get("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
-    const authResult = await gallery.getItem(config, siteid, id);
-    const result = (authResult.recordset && (authResult.recordset.length > 0))
-        ? authResult.recordset[0] : null;
-        
-    console.log({authUser: authUser, result: result})
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
+    if (authUser && authUser.RoleNames.length > 0) {
+        const result = await gallery.getItem(config, siteid, id);
         return response.send(result);
     }
     else {
         return response.status(403).send({
-            message: 'you do not have permission to access this / POST',
+            message: 'you do not have permission to access this / GALLERY',
         });
     }
 });
@@ -214,6 +210,9 @@ router.put("/:siteid/:id", async function (request, response) {
 
 // delete a gallery
 router.delete("/:siteid/:id", async function (request, response) {
+    // admin can delete any gallery
+    // Authenticated users can only delete their own galelry
+    // Unauthenticated users cannot delete any thing
     const siteid = request.params.siteid;
     const authToken = LoginFunctions.getAuthenticationToken(request);
     const authID = authToken || (request.headers.authid);
@@ -221,10 +220,10 @@ router.delete("/:siteid/:id", async function (request, response) {
 
     const config = configs.find(siteid);
     const authUser = await LoginFunctions.getUserByAuthToken(config, siteid, authID);
+    const galleryItem = await gallery.getItem(config, siteid, id);
 
-    if (authUser.RoleNames.indexOf('admin') > -1) {
-        const authResult = await gallery.deleteItem(config, siteid, id);
-        const result =  authResult.recordset;
+    if ( (authUser.RoleNames.indexOf('admin') > -1) || (authUser.ITCC_UserID === galleryItem.CreateAccountID) ) {
+        await gallery.deleteItem(config, siteid, id);
         return response.send(id);
     }
     else {
