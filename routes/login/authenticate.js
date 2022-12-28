@@ -14,13 +14,17 @@ router.post("/:siteid", async (request, response) => {
 
         const config = configs.find(siteid); //(c => c.privateKeyID === siteid);
 
-        const loginResult = await login.getUserByLogin(config, username, password, siteid);
+         const authResult = await login.updateUserLoginInfo(config, username, password, siteid);
+         const loginResult = await login.getUserByLogin(config, username, password, siteid);
         const loginUser =  (loginResult.recordset && loginResult.recordset.length === 1)? loginResult.recordset[0] : null;
         loginUser.RoleNames = (loginUser.RoleNames.length > 0) ? loginUser.RoleNames.split(',') : [];
-      // console.log({loginUser:loginUser, AuthID:loginUser, username: username, password: password})
+        //console.log({authResult: authResult, loginUser: loginUser ,AuthID: loginUser.AuthID})
 
-        if(loginUser && loginUser.AuthID){
-            await login.updateUserLoginInfo(config, username, password, siteid, loginUser.AuthID);
+        if( 
+            (loginUser && loginUser.AuthID) && 
+            (authResult && authResult.AuthID) && 
+            (loginUser.AuthID === authResult.AuthID) ){
+            //await login.updateUserLoginInfo(config, username, password, siteid, loginUser.AuthID);
             return response.send(loginUser);
         }else{
             response.set('WWW-Authenticate', 'Basic realm=Authorization Required');

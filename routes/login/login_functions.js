@@ -30,7 +30,7 @@ const LoginFunctions = {
             '    WHERE ( (UR.ITCC_UserID = WU.ITCC_UserID) AND (W1.PrivateKeyID = @PrivateKeyID) ) ' +
             '    FOR XML PATH(' + "''" + ') ) ' + ' ,1,1, ' + " '') ";
             let query = ' SELECT US.UserToken, ISNULL(US.LastLoginDate, GETDATE()) AS LastLoginDate, ';
-            query += ' DATEDIFF(mi, ISNULL(US.LastLoginDate, GETDATE()), GETDATE()) AS TimeDiffMin, NewID() AS AuthID ';
+            query += ' DATEDIFF(mi, ISNULL(US.LastLoginDate, GETDATE()), GETDATE()) AS TimeDiffMin, US.UserToken AS AuthID ';
             query += ' ,WU.ITCC_WebsiteID ,US.ITCC_UserID, WS.Title AS WebsiteName, US.UserName' ;
             query += ' , ' + roleQuery;
 
@@ -61,16 +61,33 @@ const LoginFunctions = {
         Update's a User's Login Info based on their UserName & Password & 
         Update the User's UserToken & Login date in SQL Server
     */
-    updateUserLoginInfo: async (config, username, password, privateKeyID, authID) => {
+    updateUserLoginInfo: async (config, username, password, privateKeyID) => {
         privateKeyID = privateKeyID ? String(privateKeyID).trim().toLowerCase() : privateKeyID;
         username = username ? String(username).trim().toLowerCase() : username;
         password = password ? String(password).trim() : password;
 
         try {
             await sql.connect(config);
-            let query = ' UPDATE ITCC_USER SET ' ;
+            let whereQuery = 
+            ' FROM [ITCC_User] US (NOLOCK) JOIN [ITCC_WebsiteUser] WU (NOLOCK) ';
+            whereQuery += ' ON (US.ITCC_UserID = WU.ITCC_UserID) ';
+            whereQuery += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
+            whereQuery +=   ' WHERE ( ' +
+            ' (RTRIM(LTRIM(LOWER(US.UserName))) = @Username) AND (RTRIM(LTRIM(US.Password)) = @Password) ' +
+            ' AND (WS.PrivateKeyID = @PrivateKeyID) ' +
+            ') ';
+
+            let query = ' SELECT @AuthID = NEWID() ' + whereQuery;
+
+            query += '; BEGIN ';
+            query += ' UPDATE ITCC_USER SET ' ;
             query += 'UserToken = @AuthID, ';
             query += 'LastLoginDate = GETDATE()';
+            query += whereQuery;
+            query += ' END ';
+            query += '; SELECT @AuthID AuthID ';
+
+            /*
             query += ' FROM [ITCC_User] US (NOLOCK) JOIN [ITCC_WebsiteUser] WU (NOLOCK) ';
             query += ' ON (US.ITCC_UserID = WU.ITCC_UserID) ';
             query += ' JOIN [ITCC_Website] WS (NOLOCK) ON (WU.ITCC_WebsiteID = WS.ITCC_WebsiteID) ';
@@ -78,20 +95,22 @@ const LoginFunctions = {
             ' (RTRIM(LTRIM(LOWER(US.UserName))) = @Username) AND (RTRIM(LTRIM(US.Password)) = @Password) ' +
             ' AND (WS.PrivateKeyID = @PrivateKeyID) ' +
             ') ';
+            */
 
             const request = new sql.Request();
             request.input('PrivateKeyID', sql.UniqueIdentifier, privateKeyID);
-            request.input('AuthID', sql.UniqueIdentifier, authID);
+            request.input('AuthID', sql.UniqueIdentifier, privateKeyID);
             request.input('Username', sql.NVarChar(64), username);
             request.input('Password', sql.NVarChar(64), password);
 
-            // console.log({updateUserLoginInfo: query});
-            const result = await request.query(query);
+            const authResult = await request.query(query);
+            const result = (authResult && authResult.recordset && authResult.recordset.length > 0) ? authResult.recordset[0] : null;
+            //console.log({updateUserLoginInfo: query, result: result});
             return result;
 
         } catch (err) {
-            //console.log({updateUserLoginInfo: err});
-            throw err
+            console.log({updateUserLoginInfo: err});
+            return null;
         }
     },
 
